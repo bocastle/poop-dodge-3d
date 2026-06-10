@@ -79,13 +79,13 @@ Each feature completion must include:
 - Merge into `develop`
 - Push of `develop`
 
-Use short, clear commit messages, for example:
+Write commit messages in Korean. Use short, clear messages, for example:
 
 ```text
-Add project foundation
-Implement player controls
-Add obstacle collision loop
-Optimize mobile rendering
+프로젝트 기반 설정
+플레이어 조작 구현
+장애물 충돌 루프 추가
+모바일 렌더링 최적화
 ```
 
 ## Documentation Rules

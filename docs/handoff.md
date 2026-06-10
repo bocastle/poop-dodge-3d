@@ -18,6 +18,7 @@ Build a browser-first Three.js dodge game. The player avoids falling objects in 
 - Use `main -> develop -> feature/<feature-name>`.
 - Use subagents only for independent work.
 - Commit and push after each major feature.
+- Write commit messages in Korean.
 - Update this handoff document whenever the next developer needs fresh context.
 - Add a retrospective under `docs/retrospectives/` after each major feature.
 
