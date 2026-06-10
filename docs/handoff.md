@@ -3,10 +3,10 @@
 ## Current State
 
 - Repository: `poop-dodge-3d`
-- Active implementation branch: `feature/project-foundation`
+- Current branch: `develop`
 - Integration branch: `develop`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: local web MVP implemented and verified.
+- Project status: local web MVP implemented, verified, merged into `develop`, and pushed.
 - Deployment status: no deployment. The current goal is web optimization before public release.
 
 ## Product Direction
@@ -36,10 +36,10 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Merge `feature/project-foundation` into `develop` after final review.
-2. Push `develop`.
-3. Continue with `feature/web-optimization` or `feature/game-polish` if more polish is requested.
-4. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
+1. Continue from `develop`.
+2. Create the next feature branch, likely `feature/web-optimization` or `feature/game-polish`.
+3. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
+4. Decide whether `main` should receive the MVP after user review.
 
 ## Useful Commands
 
