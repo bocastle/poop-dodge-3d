@@ -58,4 +58,5 @@ npm run preview
 - Do not start implementation work before the current feature design is approved.
 - The production build currently emits a large chunk warning because Three.js is bundled in the game entry. The gzipped JS is about 297 kB in the verified build.
 - Browser verification was performed in Chrome against `npm run preview`.
+- The latest mobile layout pass constrains the HUD and start/game-over panel to fit narrow browser widths without horizontal clipping.
 - Mobile touch logic is implemented, but real-device mobile testing is still recommended before public release.
