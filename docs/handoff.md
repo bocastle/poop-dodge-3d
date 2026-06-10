@@ -3,14 +3,26 @@
 ## Current State
 
 - Repository: `poop-dodge-3d`
-- Branch: `main`
+- Active implementation branch: `feature/project-foundation`
+- Integration branch: `develop`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: repository initialized with README and agent workflow documentation.
+- Project status: local web MVP implemented and verified.
 - Deployment status: no deployment. The current goal is web optimization before public release.
 
 ## Product Direction
 
 Build a browser-first Three.js dodge game. The player avoids falling objects in a 3D scene. The first delivery target is a local web build that works well on desktop and mobile browsers.
+
+The MVP now includes:
+
+- Vite, React, TypeScript, and React Three Fiber foundation
+- Full-viewport 3D scene with camera, lights, floor, player, and instanced falling obstacles
+- Desktop keyboard controls with `WASD` and arrow keys
+- Mobile-oriented pointer drag controls
+- Score, best score, dodge count, elapsed time, game-over, and restart state
+- Local high-score persistence through `localStorage`
+- Responsive HUD and safe-area-aware layout
+- Unit tests for movement, collision, difficulty, score, and high-score logic
 
 ## Working Agreement
 
@@ -24,15 +36,12 @@ Build a browser-first Three.js dodge game. The player avoids falling objects in 
 
 ## Next Steps
 
-1. Create `develop` from `main`.
-2. Create `feature/project-foundation` from `develop`.
-3. Scaffold the Vite, React, TypeScript, and Three.js project.
-4. Add initial checks for linting, testing, and production build.
-5. Update this handoff and add the first retrospective before merging into `develop`.
+1. Merge `feature/project-foundation` into `develop` after final review.
+2. Push `develop`.
+3. Continue with `feature/web-optimization` or `feature/game-polish` if more polish is requested.
+4. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
 
 ## Useful Commands
-
-These commands are expected after the project is scaffolded:
 
 ```bash
 npm install
@@ -47,4 +56,6 @@ npm run preview
 
 - Do not deploy until the user explicitly approves deployment.
 - Do not start implementation work before the current feature design is approved.
-- Keep the early game small: scene, player movement, falling objects, collision, score, restart, and mobile controls.
+- The production build currently emits a large chunk warning because Three.js is bundled in the game entry. The gzipped JS is about 297 kB in the verified build.
+- Browser verification was performed in Chrome against `npm run preview`.
+- Mobile touch logic is implemented, but real-device mobile testing is still recommended before public release.
