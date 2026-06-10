@@ -57,7 +57,8 @@ button {
   display: grid;
   grid-template-columns: repeat(4, minmax(72px, 1fr));
   gap: 8px;
-  width: min(680px, 100%);
+  width: 100%;
+  max-width: 680px;
   margin: 0 auto;
 }
 
@@ -94,7 +95,8 @@ button {
   pointer-events: auto;
   align-self: center;
   justify-self: center;
-  width: min(420px, calc(100vw - 36px));
+  width: 100%;
+  max-width: 420px;
   padding: 28px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
@@ -116,9 +118,10 @@ button {
 .panel h1 {
   margin: 0;
   color: #ffffff;
-  font-size: 38px;
+  font-size: clamp(30px, 8vw, 38px);
   line-height: 1.05;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .summary {
@@ -126,6 +129,7 @@ button {
   color: #c7d5e4;
   font-size: 15px;
   line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .panel button {
@@ -174,6 +178,8 @@ button {
 
   .scorebar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 342px;
+    max-width: calc(100vw - 24px);
   }
 
   .scorebar div {
@@ -185,11 +191,13 @@ button {
   }
 
   .panel {
+    width: 342px;
+    max-width: calc(100vw - 24px);
     padding: 24px 20px;
   }
 
   .panel h1 {
-    font-size: 32px;
+    font-size: clamp(28px, 8vw, 32px);
   }
 
   .summary {
