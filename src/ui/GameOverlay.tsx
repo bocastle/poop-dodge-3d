@@ -9,8 +9,8 @@ type GameOverlayProps = {
 
 export function GameOverlay({ phase, stats, touchActive, onStart }: GameOverlayProps) {
   return (
-    <section className="hud" aria-live="polite">
-      <header className="scorebar">
+    <section className="hud">
+      <header className="scorebar" aria-live="off">
         <div>
           <span className="label">Score</span>
           <strong>{stats.score.toLocaleString()}</strong>
@@ -29,18 +29,32 @@ export function GameOverlay({ phase, stats, touchActive, onStart }: GameOverlayP
         </div>
       </header>
 
-      {phase !== "playing" && (
-        <div className="panel">
-          <p className="eyebrow">3D dodge arcade</p>
-          <h1>{phase === "ready" ? "Poop Dodge 3D" : "Game Over"}</h1>
-          <p className="summary">
-            Move fast, read the falling pattern, and survive as long as possible.
-          </p>
-          <button type="button" onClick={onStart}>
-            {phase === "ready" ? "Start" : "Restart"}
-          </button>
-        </div>
-      )}
+      <div className="hud-panel-region">
+        {phase !== "playing" && (
+          <div className="panel" data-panel={phase}>
+            <div className="panel-status" role="status" aria-atomic="true">
+              <p className="eyebrow">{phase === "ready" ? "3D dodge arcade" : "run ended"}</p>
+              <h1>{phase === "ready" ? "Poop Dodge 3D" : "Game Over"}</h1>
+              {phase === "game-over" && (
+                <div className="final-score">
+                  <span>Final score</span>
+                  <strong>{stats.score.toLocaleString()}</strong>
+                </div>
+              )}
+              <p className="summary">
+                {phase === "ready"
+                  ? "Dash through the danger zone, read the shadows, and survive the drop."
+                  : `You dodged ${stats.dodged.toLocaleString()} drops in ${Math.floor(
+                      stats.elapsedSeconds
+                    )} seconds.`}
+              </p>
+            </div>
+            <button type="button" onClick={onStart}>
+              {phase === "ready" ? "Start" : "Restart"}
+            </button>
+          </div>
+        )}
+      </div>
 
       <footer className="controls">
         <span>WASD / Arrow keys</span>

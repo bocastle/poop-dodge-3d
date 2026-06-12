@@ -62,7 +62,7 @@ export function App() {
   }, []);
 
   return (
-    <main className="game-shell" {...touchControls.handlers}>
+    <main className="game-shell" data-phase={phase} {...touchControls.handlers}>
       <Canvas
         camera={{ position: [0, 8.5, 9], fov: 48 }}
         dpr={[1, 1.5]}

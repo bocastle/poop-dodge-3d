@@ -39,6 +39,10 @@ button {
     linear-gradient(180deg, #101820 0%, #141f2a 56%, #172431 100%);
 }
 
+.game-shell:not([data-phase="playing"]) {
+  touch-action: pan-y;
+}
+
 .game-shell canvas {
   display: block;
 }
@@ -48,7 +52,8 @@ button {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  row-gap: 10px;
   padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
     max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
 }
@@ -91,10 +96,27 @@ button {
   white-space: nowrap;
 }
 
+.game-shell[data-phase="playing"] .scorebar div {
+  border-color: rgba(123, 223, 242, 0.22);
+}
+
+.hud-panel-region {
+  pointer-events: none;
+  min-height: 0;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 0;
+}
+
+.game-shell:not([data-phase="playing"]) .hud-panel-region {
+  pointer-events: auto;
+}
+
 .panel {
   pointer-events: auto;
-  align-self: center;
-  justify-self: center;
   width: 100%;
   max-width: 420px;
   padding: 28px;
@@ -104,6 +126,10 @@ button {
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.36);
   text-align: center;
   backdrop-filter: blur(16px);
+}
+
+.panel[data-panel="game-over"] {
+  border-color: rgba(255, 107, 107, 0.38);
 }
 
 .eyebrow {
@@ -122,6 +148,29 @@ button {
   line-height: 1.05;
   letter-spacing: 0;
   overflow-wrap: anywhere;
+}
+
+.final-score {
+  display: grid;
+  gap: 4px;
+  margin: 18px auto 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 230, 109, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 230, 109, 0.08);
+}
+
+.final-score span {
+  color: #9fb3c8;
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.final-score strong {
+  color: #ffe66d;
+  font-size: 30px;
+  line-height: 1;
 }
 
 .summary {
@@ -202,6 +251,83 @@ button {
 
   .summary {
     font-size: 14px;
+  }
+}
+
+@media (max-height: 560px) {
+  .game-shell {
+    min-height: 100svh;
+  }
+
+  .hud {
+    row-gap: 6px;
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  .scorebar {
+    gap: 6px;
+    max-width: 620px;
+  }
+
+  .scorebar div {
+    padding: 7px 9px;
+  }
+
+  .label {
+    font-size: 10px;
+  }
+
+  .scorebar strong {
+    font-size: 16px;
+  }
+
+  .hud-panel-region {
+    align-items: start;
+    padding: 2px 0;
+  }
+
+  .panel {
+    max-width: 390px;
+    padding: 16px;
+  }
+
+  .eyebrow {
+    margin-bottom: 5px;
+    font-size: 11px;
+  }
+
+  .panel h1 {
+    font-size: clamp(24px, 7vw, 30px);
+  }
+
+  .final-score {
+    margin-top: 10px;
+    padding: 9px;
+  }
+
+  .final-score strong {
+    font-size: 24px;
+  }
+
+  .summary {
+    margin: 10px 0 14px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .panel button {
+    min-width: 128px;
+    min-height: 40px;
+  }
+
+  .controls {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .controls span {
+    padding: 5px 8px;
   }
 }
 

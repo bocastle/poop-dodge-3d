@@ -6,7 +6,7 @@
 - Current branch: `develop`
 - Integration branch: `develop`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: local web MVP implemented, verified, merged into `develop`, and pushed.
+- Project status: local web MVP implemented and a game-polish pass is in progress on `feature/game-polish-pass`.
 - Deployment status: no deployment. The current goal is web optimization before public release.
 
 ## Product Direction
@@ -22,6 +22,7 @@ The MVP now includes:
 - Score, best score, dodge count, elapsed time, game-over, and restart state
 - Local high-score persistence through `localStorage`
 - Responsive HUD and safe-area-aware layout
+- Game polish pass with extracted tuning constants, warning floor cues, improved player lean, restrained camera shake, low arena walls, stronger game-over presentation, and short-viewport panel handling
 - Unit tests for movement, collision, difficulty, score, and high-score logic
 
 ## Working Agreement
@@ -40,6 +41,7 @@ The MVP now includes:
 2. Create the next feature branch, likely `feature/web-optimization` or `feature/game-polish`.
 3. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
 4. Decide whether `main` should receive the MVP after user review.
+5. Decide whether the next feature should focus on sound, authored assets, model replacement, or real-device mobile tuning.
 
 ## Useful Commands
 
@@ -59,4 +61,6 @@ npm run preview
 - The production build currently emits a large chunk warning because Three.js is bundled in the game entry. The gzipped JS is about 297 kB in the verified build.
 - Browser verification was performed in Chrome against `npm run preview`.
 - The latest mobile layout pass constrains the HUD and start/game-over panel to fit narrow browser widths without horizontal clipping.
+- The game-polish pass was browser-checked at desktop `1280x720`, mobile portrait `390x844`, and mobile landscape `667x375`; the landscape game-over panel kept the final score and restart button in view.
 - Mobile touch logic is implemented, but real-device mobile testing is still recommended before public release.
+- The game still uses procedural primitives only. Replacing the player and obstacles with authored models is intentionally deferred.

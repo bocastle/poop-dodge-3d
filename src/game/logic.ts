@@ -1,11 +1,9 @@
 import type { ArenaBounds, Difficulty, InputVector, Obstacle, Position } from "./types";
+import { GAME_TUNING } from "./tuning";
 
-export const PLAYER_SPEED = 5.5;
-export const PLAYER_RADIUS = 0.52;
-export const ARENA_BOUNDS: ArenaBounds = {
-  width: 7.2,
-  depth: 7.2,
-};
+export const PLAYER_SPEED = GAME_TUNING.player.speed;
+export const PLAYER_RADIUS = GAME_TUNING.player.radius;
+export const ARENA_BOUNDS: ArenaBounds = GAME_TUNING.arena;
 
 export function normalizeInput(input: InputVector): InputVector {
   const length = Math.hypot(input.x, input.z);
@@ -46,16 +44,39 @@ export function isCollision(
 }
 
 export function getDifficulty(elapsedSeconds: number): Difficulty {
-  const level = Math.min(elapsedSeconds / 35, 1);
+  const level = Math.min(elapsedSeconds / GAME_TUNING.difficulty.rampSeconds, 1);
+
+  if (level === 1) {
+    return {
+      fallSpeed: GAME_TUNING.difficulty.maxFallSpeed,
+      spawnInterval: GAME_TUNING.difficulty.minSpawnInterval,
+      maxObstacles: GAME_TUNING.difficulty.maxObstacles,
+    };
+  }
+
   return {
-    fallSpeed: 3.1 + level * 2.4,
-    spawnInterval: 0.82 - level * 0.34,
-    maxObstacles: Math.round(14 + level * 12),
+    fallSpeed:
+      GAME_TUNING.difficulty.startFallSpeed +
+      level *
+        (GAME_TUNING.difficulty.maxFallSpeed - GAME_TUNING.difficulty.startFallSpeed),
+    spawnInterval:
+      GAME_TUNING.difficulty.startSpawnInterval -
+      level *
+        (GAME_TUNING.difficulty.startSpawnInterval -
+          GAME_TUNING.difficulty.minSpawnInterval),
+    maxObstacles: Math.round(
+      GAME_TUNING.difficulty.startMaxObstacles +
+        level *
+          (GAME_TUNING.difficulty.maxObstacles - GAME_TUNING.difficulty.startMaxObstacles)
+    ),
   };
 }
 
 export function getScore(elapsedSeconds: number, dodged: number) {
-  return Math.floor(elapsedSeconds * 12 + dodged * 35);
+  return Math.floor(
+    elapsedSeconds * GAME_TUNING.score.pointsPerSecond +
+      dodged * GAME_TUNING.score.pointsPerDodge
+  );
 }
 
 export function getHighScore(previousHighScore: number, score: number) {

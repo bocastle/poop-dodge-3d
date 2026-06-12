@@ -7,6 +7,7 @@ import {
   movePlayer,
   normalizeInput,
 } from "./logic";
+import { GAME_TUNING } from "./tuning";
 
 describe("game logic", () => {
   it("normalizes diagonal input", () => {
@@ -23,6 +24,18 @@ describe("game logic", () => {
       { width: 7.2, depth: 7.2 }
     );
     expect(next.x).toBe(3.6);
+  });
+
+  it("uses shared tuning for arena movement", () => {
+    const next = movePlayer(
+      { x: GAME_TUNING.arena.width / 2 - 0.05, y: 0.42, z: 0 },
+      { x: 1, z: 0 },
+      1,
+      GAME_TUNING.player.speed,
+      GAME_TUNING.arena
+    );
+
+    expect(next.x).toBe(GAME_TUNING.arena.width / 2);
   });
 
   it("detects collision near the player", () => {
@@ -53,6 +66,16 @@ describe("game logic", () => {
     expect(late.fallSpeed).toBeGreaterThan(start.fallSpeed);
     expect(late.spawnInterval).toBeLessThan(start.spawnInterval);
     expect(late.maxObstacles).toBeGreaterThan(start.maxObstacles);
+  });
+
+  it("keeps difficulty within tuned limits", () => {
+    const start = getDifficulty(0);
+    const late = getDifficulty(90);
+
+    expect(start.fallSpeed).toBe(GAME_TUNING.difficulty.startFallSpeed);
+    expect(late.fallSpeed).toBe(GAME_TUNING.difficulty.maxFallSpeed);
+    expect(late.spawnInterval).toBe(GAME_TUNING.difficulty.minSpawnInterval);
+    expect(late.maxObstacles).toBe(GAME_TUNING.difficulty.maxObstacles);
   });
 
   it("calculates score from elapsed time and dodges", () => {
