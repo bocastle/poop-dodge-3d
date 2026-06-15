@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  createSeededObstacle,
   getDifficulty,
   getHighScore,
   getScore,
@@ -78,12 +79,49 @@ describe("game logic", () => {
     expect(late.maxObstacles).toBe(GAME_TUNING.difficulty.maxObstacles);
   });
 
-  it("calculates score from elapsed time and dodges", () => {
+  it("calculates score from elapsed time, dodges, and fun bonus", () => {
     expect(getScore(10, 3)).toBe(225);
+    expect(getScore(10, 3, 90)).toBe(315);
   });
 
   it("keeps the larger high score", () => {
     expect(getHighScore(120, 90)).toBe(120);
     expect(getHighScore(120, 220)).toBe(220);
+  });
+
+  it("creates identical obstacles for the same match seed and spawn index", () => {
+    const difficulty = getDifficulty(12);
+
+    expect(createSeededObstacle(42.5, 7, difficulty)).toEqual(
+      createSeededObstacle(42.5, 7, difficulty)
+    );
+  });
+
+  it("changes the obstacle id or position when the spawn index changes", () => {
+    const difficulty = getDifficulty(12);
+    const first = createSeededObstacle(42.5, 7, difficulty);
+    const next = createSeededObstacle(42.5, 8, difficulty);
+
+    expect([next.id, next.x, next.z]).not.toEqual([first.id, first.x, first.z]);
+  });
+
+  it("changes the obstacle id or position when the match seed changes", () => {
+    const difficulty = getDifficulty(12);
+    const first = createSeededObstacle(42.5, 7, difficulty);
+    const next = createSeededObstacle(43.5, 7, difficulty);
+
+    expect([next.id, next.x, next.z]).not.toEqual([first.id, first.x, first.z]);
+  });
+
+  it("keeps obstacle ids unique for large multiplayer seeds", () => {
+    const difficulty = getDifficulty(12);
+    const matchSeed = 4_946_015_098_311_530;
+    const obstacles = Array.from({ length: 12 }, (_, spawnIndex) =>
+      createSeededObstacle(matchSeed, spawnIndex, difficulty)
+    );
+
+    expect(new Set(obstacles.map((obstacle) => obstacle.id)).size).toBe(
+      obstacles.length
+    );
   });
 });

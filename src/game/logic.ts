@@ -72,10 +72,11 @@ export function getDifficulty(elapsedSeconds: number): Difficulty {
   };
 }
 
-export function getScore(elapsedSeconds: number, dodged: number) {
+export function getScore(elapsedSeconds: number, dodged: number, bonusScore = 0) {
   return Math.floor(
     elapsedSeconds * GAME_TUNING.score.pointsPerSecond +
-      dodged * GAME_TUNING.score.pointsPerDodge
+      dodged * GAME_TUNING.score.pointsPerDodge +
+      bonusScore
   );
 }
 
@@ -96,6 +97,17 @@ export function createObstacle(seed: number, difficulty: Difficulty): Obstacle {
     radius,
     rotation: seededRange(seed * 91.7, 0, Math.PI * 2),
     spin: seededRange(seed * 13.4, 1.2, 3.4),
+  };
+}
+
+export function createSeededObstacle(
+  matchSeed: number,
+  spawnIndex: number,
+  difficulty: Difficulty
+): Obstacle {
+  return {
+    ...createObstacle(matchSeed + spawnIndex * 0.9973, difficulty),
+    id: `${matchSeed}:${spawnIndex}`,
   };
 }
 

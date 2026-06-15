@@ -1,20 +1,47 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
-import type { InstancedMesh, Mesh } from "three";
-import { Color, Object3D } from "three";
-import { getCameraShake, getPlayerLean, getWarningOpacity, getWarningScale } from "./feedback";
+import { useEffect, useRef, useState } from "react";
+import type { Group } from "three";
+import { getCameraShake } from "./feedback";
+import { getCalloutTone, getRunSummary, isInsideShieldSaveClearRadius } from "./feel";
+import {
+  createInitialCombo,
+  getCloseCallBonus,
+  getCloseCallTier,
+  getNextCombo,
+  getShieldPickupPosition,
+  isInCloseCallWindow,
+  isShieldCollected,
+  shouldSpawnShield,
+} from "./fun";
 import {
   ARENA_BOUNDS,
   PLAYER_RADIUS,
   PLAYER_SPEED,
-  createObstacle,
+  createSeededObstacle,
   getDifficulty,
   getScore,
   isCollision,
   movePlayer,
 } from "./logic";
 import { GAME_TUNING } from "./tuning";
-import type { GamePhase, GameStats, InputVector, Obstacle, Position } from "./types";
+import type {
+  ComboState,
+  GamePhase,
+  GameStats,
+  InputVector,
+  MultiplayerMatchConfig,
+  Obstacle,
+  Position,
+  ShieldBurst as ShieldBurstData,
+  ShieldPickup as ShieldPickupData,
+} from "./types";
+import { DangerRing } from "./visuals/DangerRing";
+import { DoodleHazard } from "./visuals/DoodleHazard";
+import { DoodlePlayer } from "./visuals/DoodlePlayer";
+import { PaperArena } from "./visuals/PaperArena";
+import { RemoteDoodlePlayer } from "./visuals/RemoteDoodlePlayer";
+import { ShieldBurst } from "./visuals/ShieldBurst";
+import { ShieldPickup } from "./visuals/ShieldPickup";
 
 const startPosition: Position = { x: 0, y: GAME_TUNING.player.startY, z: 0 };
 const maxRenderedObstacles = GAME_TUNING.visuals.maxRenderedObstacles;
@@ -24,6 +51,9 @@ type GameSceneProps = {
   input: InputVector;
   phase: GamePhase;
   runId: number;
+  multiplayerMatch?: MultiplayerMatchConfig;
+  onLocalSnapshot?: (position: Position, stats: GameStats) => void;
+  onMultiplayerEliminated?: (stats: GameStats) => void;
   onGameOver: (stats: GameStats) => void;
   onStatsChange: (stats: GameStats) => void;
 };
@@ -32,46 +62,86 @@ export function GameScene({
   input,
   phase,
   runId,
+  multiplayerMatch,
+  onLocalSnapshot,
+  onMultiplayerEliminated,
   onGameOver,
   onStatsChange,
 }: GameSceneProps) {
-  const playerRef = useRef<Mesh>(null);
-  const obstacleMeshRef = useRef<InstancedMesh>(null);
-  const warningMeshRef = useRef<InstancedMesh>(null);
+  const playerRef = useRef<Group>(null);
   const playerPosition = useRef<Position>(startPosition);
   const obstacles = useRef<Obstacle[]>([]);
+  const [renderObstacles, setRenderObstacles] = useState<Obstacle[]>([]);
   const elapsed = useRef(0);
   const spawnTimer = useRef(0);
+  const spawnIndex = useRef(0);
   const dodged = useRef(0);
   const lastStatsSecond = useRef(-1);
+  const lastLocalSnapshotAt = useRef(0);
   const gameOverSent = useRef(false);
   const impactTimer = useRef(0);
-  const matrixObject = useMemo(() => new Object3D(), []);
-  const warningColor = useMemo(() => new Color(), []);
+  const freezeTimer = useRef(0);
+  const bestComboMultiplier = useRef(1);
+  const bestComboStreak = useRef(0);
+  const calloutTone = useRef<GameStats["calloutTone"]>("neutral");
+  const bonusScore = useRef(0);
+  const closeCalls = useRef(0);
+  const combo = useRef<ComboState>(createInitialCombo());
+  const shieldActive = useRef(false);
+  const shieldSaves = useRef(0);
+  const shieldPickup = useRef<ShieldPickupData | null>(null);
+  const [renderShieldPickup, setRenderShieldPickup] = useState<ShieldPickupData | null>(null);
+  const [renderShieldBurst, setRenderShieldBurst] = useState<ShieldBurstData | null>(null);
+  const lastShieldSpawnedAt = useRef(0);
+  const callout = useRef<string | null>(null);
+  const calloutId = useRef(0);
+  const matchStartLockedRef = useRef(false);
+  const [matchStartLocked, setMatchStartLocked] = useState(false);
+
+  const updateMatchStartLocked = (isLocked: boolean) => {
+    if (matchStartLockedRef.current === isLocked) {
+      return;
+    }
+
+    matchStartLockedRef.current = isLocked;
+    setMatchStartLocked(isLocked);
+  };
 
   useEffect(() => {
     playerPosition.current = startPosition;
     obstacles.current = [];
+    setRenderObstacles([]);
     elapsed.current = 0;
     spawnTimer.current = 0;
+    spawnIndex.current = 0;
     dodged.current = 0;
     lastStatsSecond.current = -1;
+    lastLocalSnapshotAt.current = 0;
     gameOverSent.current = false;
     impactTimer.current = 0;
+    freezeTimer.current = 0;
+    bestComboMultiplier.current = 1;
+    bestComboStreak.current = 0;
+    calloutTone.current = "neutral";
+    bonusScore.current = 0;
+    closeCalls.current = 0;
+    combo.current = createInitialCombo();
+    shieldActive.current = false;
+    shieldSaves.current = 0;
+    shieldPickup.current = null;
+    setRenderShieldPickup(null);
+    setRenderShieldBurst(null);
+    lastShieldSpawnedAt.current = 0;
+    callout.current = null;
+    calloutId.current = 0;
+    matchStartLockedRef.current = false;
+    setMatchStartLocked(false);
     if (playerRef.current) {
       playerRef.current.position.set(startPosition.x, startPosition.y, startPosition.z);
       playerRef.current.rotation.set(0, 0, 0);
       playerRef.current.scale.set(1, 1, 1);
     }
-    syncObstacleMesh(obstacleMeshRef.current, matrixObject, obstacles.current);
-    syncWarningMesh(warningMeshRef.current, matrixObject, warningColor, obstacles.current);
-  }, [matrixObject, runId, warningColor]);
-
-  useEffect(() => {
-    if (phase !== "playing") {
-      syncWarningMesh(warningMeshRef.current, matrixObject, warningColor, []);
-    }
-  }, [matrixObject, phase, warningColor]);
+  }, [runId]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
@@ -92,7 +162,24 @@ export function GameScene({
     }
     state.camera.lookAt(0, 0, 0);
 
+    if (freezeTimer.current > 0) {
+      freezeTimer.current = Math.max(0, freezeTimer.current - dt);
+      state.camera.lookAt(0, 0, 0);
+      return;
+    }
+
     if (phase !== "playing") {
+      updateMatchStartLocked(false);
+      player.rotation.x = 0;
+      player.rotation.z = 0;
+      player.scale.set(1, 1, 1);
+      player.rotation.y += dt * 0.45;
+      return;
+    }
+
+    const gameplayLocked = isMultiplayerGameplayLocked(multiplayerMatch);
+    updateMatchStartLocked(gameplayLocked);
+    if (gameplayLocked) {
       player.rotation.x = 0;
       player.rotation.z = 0;
       player.scale.set(1, 1, 1);
@@ -114,18 +201,84 @@ export function GameScene({
       playerPosition.current.y,
       playerPosition.current.z
     );
-    const lean = getPlayerLean(input);
-    player.rotation.y = lean.rotationY;
-    player.rotation.x = lean.rotationX;
-    player.scale.set(1, lean.scaleY, 1);
+    player.rotation.set(0, 0, 0);
+    player.scale.set(1, 1, 1);
+
+    const activePickup = shieldPickup.current;
+    if (activePickup && elapsed.current >= activePickup.expiresAtSeconds) {
+      shieldPickup.current = null;
+      setRenderShieldPickup(null);
+    }
+
+    if (renderShieldBurst && elapsed.current >= renderShieldBurst.expiresAtSeconds) {
+      setRenderShieldBurst(null);
+    }
+
+    if (shieldPickup.current && isShieldCollected(playerPosition.current, shieldPickup.current)) {
+      shieldActive.current = true;
+      callout.current = "SHIELD!";
+      calloutId.current += 1;
+      calloutTone.current = "shield";
+      shieldPickup.current = null;
+      setRenderShieldPickup(null);
+      const comboAlive =
+        combo.current.streak > 0 && elapsed.current <= combo.current.expiresAtSeconds;
+      onStatsChange({
+        score: getScore(elapsed.current, dodged.current, bonusScore.current),
+        highScore: 0,
+        dodged: dodged.current,
+        elapsedSeconds: elapsed.current,
+        closeCalls: closeCalls.current,
+        comboMultiplier: comboAlive ? combo.current.multiplier : 1,
+        bestComboMultiplier: bestComboMultiplier.current,
+        bestComboStreak: bestComboStreak.current,
+        shieldActive: shieldActive.current,
+        shieldSaves: shieldSaves.current,
+        callout: callout.current,
+        calloutId: calloutId.current,
+        calloutTone: calloutTone.current,
+        runSummary: getRunSummary({
+          closeCalls: closeCalls.current,
+          bestComboMultiplier: bestComboMultiplier.current,
+          bestComboStreak: bestComboStreak.current,
+          shieldSaves: shieldSaves.current,
+          dodged: dodged.current,
+        }),
+      });
+    }
+
+    if (
+      shouldSpawnShield(
+        elapsed.current,
+        lastShieldSpawnedAt.current,
+        shieldActive.current,
+        shieldPickup.current
+      )
+    ) {
+      const position = getShieldPickupPosition(state.clock.elapsedTime + runId);
+      const pickup: ShieldPickupData = {
+        id: `shield-${runId}-${Math.round(elapsed.current * 1000)}`,
+        x: position.x,
+        z: position.z,
+        expiresAtSeconds: elapsed.current + GAME_TUNING.fun.shieldPickupExpiresSeconds,
+      };
+      shieldPickup.current = pickup;
+      setRenderShieldPickup(pickup);
+      lastShieldSpawnedAt.current = elapsed.current;
+    }
 
     spawnTimer.current -= dt;
+    let renderListChanged = false;
 
     if (spawnTimer.current <= 0) {
-      obstacles.current.push(
-        createObstacle(state.clock.elapsedTime + obstacles.current.length, difficulty)
-      );
+      const obstacleSeed =
+        multiplayerMatch?.enabled === true && multiplayerMatch.matchSeed !== null
+          ? multiplayerMatch.matchSeed
+          : runId + 1;
+      obstacles.current.push(createSeededObstacle(obstacleSeed, spawnIndex.current, difficulty));
+      spawnIndex.current += 1;
       spawnTimer.current = difficulty.spawnInterval;
+      renderListChanged = true;
     }
 
     let avoided = 0;
@@ -134,16 +287,55 @@ export function GameScene({
       obstacle.y -= difficulty.fallSpeed * dt;
       obstacle.rotation += obstacle.spin * dt;
 
+      if (isInCloseCallWindow(obstacle.y)) {
+        const horizontalDistance = Math.hypot(
+          playerPosition.current.x - obstacle.x,
+          playerPosition.current.z - obstacle.z
+        );
+        obstacle.closestSafeDistance = Math.min(
+          obstacle.closestSafeDistance ?? Number.POSITIVE_INFINITY,
+          horizontalDistance
+        );
+      }
+
       if (obstacle.y > -1.2) {
         activeObstacles.push(obstacle);
       } else {
         avoided += 1;
+        const tier = getCloseCallTier(obstacle.closestSafeDistance ?? Number.POSITIVE_INFINITY);
+        if (tier) {
+          combo.current = getNextCombo(combo.current, elapsed.current);
+          bestComboMultiplier.current = Math.max(
+            bestComboMultiplier.current,
+            combo.current.multiplier
+          );
+          bestComboStreak.current = Math.max(bestComboStreak.current, combo.current.streak);
+          const bonus = getCloseCallBonus(tier, combo.current.multiplier);
+          bonusScore.current += bonus;
+          closeCalls.current += 1;
+          callout.current =
+            combo.current.multiplier > 1
+              ? `${tier.toUpperCase()} x${combo.current.multiplier}`
+              : tier.toUpperCase();
+          calloutId.current += 1;
+          calloutTone.current = getCalloutTone(tier, combo.current.multiplier, false);
+        }
       }
     }
-    obstacles.current = activeObstacles.slice(-Math.min(difficulty.maxObstacles, maxRenderedObstacles));
+    const nextObstacles = activeObstacles.slice(
+      -Math.min(difficulty.maxObstacles, maxRenderedObstacles)
+    );
+    if (nextObstacles.length !== obstacles.current.length) {
+      renderListChanged = true;
+    }
+    obstacles.current = nextObstacles;
 
     if (avoided > 0) {
       dodged.current += avoided;
+    }
+
+    if (renderListChanged) {
+      setRenderObstacles([...obstacles.current]);
     }
 
     const hit = obstacles.current.some((obstacle) =>
@@ -155,21 +347,91 @@ export function GameScene({
       )
     );
 
-    syncObstacleMesh(obstacleMeshRef.current, matrixObject, obstacles.current);
-    syncWarningMesh(warningMeshRef.current, matrixObject, warningColor, obstacles.current);
+    const comboAlive =
+      combo.current.streak > 0 && elapsed.current <= combo.current.expiresAtSeconds;
+    const visibleComboMultiplier = comboAlive ? combo.current.multiplier : 1;
 
     const nextStats: GameStats = {
-      score: getScore(elapsed.current, dodged.current),
+      score: getScore(elapsed.current, dodged.current, bonusScore.current),
       highScore: 0,
       dodged: dodged.current,
       elapsedSeconds: elapsed.current,
+      closeCalls: closeCalls.current,
+      comboMultiplier: visibleComboMultiplier,
+      bestComboMultiplier: bestComboMultiplier.current,
+      bestComboStreak: bestComboStreak.current,
+      shieldActive: shieldActive.current,
+      shieldSaves: shieldSaves.current,
+      callout: callout.current,
+      calloutId: calloutId.current,
+      calloutTone: calloutTone.current,
+      runSummary: getRunSummary({
+        closeCalls: closeCalls.current,
+        bestComboMultiplier: bestComboMultiplier.current,
+        bestComboStreak: bestComboStreak.current,
+        shieldSaves: shieldSaves.current,
+        dodged: dodged.current,
+      }),
     };
 
     if (hit && !gameOverSent.current) {
-      gameOverSent.current = true;
       impactTimer.current = GAME_TUNING.visuals.cameraShakeSeconds;
+
+      if (shieldActive.current) {
+        shieldActive.current = false;
+        shieldSaves.current += 1;
+        callout.current = "SHIELD SAVE!";
+        calloutId.current += 1;
+        calloutTone.current = "shield";
+        const burst: ShieldBurstData = {
+          id: calloutId.current,
+          x: playerPosition.current.x,
+          z: playerPosition.current.z,
+          startedAtSeconds: elapsed.current,
+          expiresAtSeconds: elapsed.current + GAME_TUNING.feel.shieldSaveBurstSeconds,
+        };
+        freezeTimer.current = GAME_TUNING.feel.shieldSaveFreezeSeconds;
+        setRenderShieldBurst(burst);
+        obstacles.current = obstacles.current.filter(
+          (obstacle) =>
+            !isInsideShieldSaveClearRadius(playerPosition.current, {
+              x: obstacle.x,
+              z: obstacle.z,
+            })
+        );
+        setRenderObstacles([...obstacles.current]);
+        onStatsChange({
+          ...nextStats,
+          shieldActive: shieldActive.current,
+          shieldSaves: shieldSaves.current,
+          callout: callout.current,
+          calloutId: calloutId.current,
+          calloutTone: calloutTone.current,
+          runSummary: getRunSummary({
+            closeCalls: closeCalls.current,
+            bestComboMultiplier: bestComboMultiplier.current,
+            bestComboStreak: bestComboStreak.current,
+            shieldSaves: shieldSaves.current,
+            dodged: dodged.current,
+          }),
+        });
+        return;
+      }
+
+      gameOverSent.current = true;
+      if (multiplayerMatch?.enabled === true) {
+        onMultiplayerEliminated?.(nextStats);
+      }
       onGameOver(nextStats);
       return;
+    }
+
+    if (multiplayerMatch?.enabled === true && onLocalSnapshot) {
+      const now = Date.now();
+      if (now - lastLocalSnapshotAt.current >= 100) {
+        lastLocalSnapshotAt.current = now;
+        onLocalSnapshot({ ...playerPosition.current }, nextStats);
+      }
     }
 
     const currentSecond = Math.floor(elapsed.current * 4);
@@ -181,113 +443,68 @@ export function GameScene({
 
   return (
     <>
-      <ambientLight intensity={1.1} color="#f6f1df" />
-      <directionalLight intensity={2.4} color="#fff1c7" position={[4, 7, 2]} />
-      <directionalLight intensity={1.2} color="#7bdff2" position={[-5, 5, -4]} />
+      <ambientLight intensity={1.8} color="#fff7ed" />
+      <directionalLight intensity={2.2} color="#ffffff" position={[4, 8, 5]} />
+      <directionalLight intensity={0.7} color="#bfdbfe" position={[-4, 5, -3]} />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
-        <planeGeometry args={[ARENA_BOUNDS.width + 1.6, ARENA_BOUNDS.depth + 1.6, 1, 1]} />
-        <meshStandardMaterial color="#18232d" roughness={0.92} metalness={0.05} />
-      </mesh>
+      <PaperArena bounds={ARENA_BOUNDS} />
 
-      <mesh position={[0, 0.18, -ARENA_BOUNDS.depth / 2 - 0.12]}>
-        <boxGeometry args={[ARENA_BOUNDS.width + 0.5, 0.28, 0.12]} />
-        <meshStandardMaterial color="#243544" roughness={0.88} />
-      </mesh>
-      <mesh position={[0, 0.18, ARENA_BOUNDS.depth / 2 + 0.12]}>
-        <boxGeometry args={[ARENA_BOUNDS.width + 0.5, 0.28, 0.12]} />
-        <meshStandardMaterial color="#243544" roughness={0.88} />
-      </mesh>
-      <mesh position={[-ARENA_BOUNDS.width / 2 - 0.12, 0.18, 0]}>
-        <boxGeometry args={[0.12, 0.28, ARENA_BOUNDS.depth + 0.5]} />
-        <meshStandardMaterial color="#243544" roughness={0.88} />
-      </mesh>
-      <mesh position={[ARENA_BOUNDS.width / 2 + 0.12, 0.18, 0]}>
-        <boxGeometry args={[0.12, 0.28, ARENA_BOUNDS.depth + 0.5]} />
-        <meshStandardMaterial color="#243544" roughness={0.88} />
-      </mesh>
+      <DoodlePlayer
+        ref={playerRef}
+        input={input}
+        phase={matchStartLocked ? "ready" : phase}
+      />
 
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[3.95, 4.04, 64]} />
-        <meshBasicMaterial color="#3dd6d0" transparent opacity={0.38} />
-      </mesh>
+      {multiplayerMatch?.enabled === true &&
+        multiplayerMatch.remotePlayers.map((player) => (
+          <RemoteDoodlePlayer
+            key={player.id}
+            color={player.color}
+            position={player.position}
+            eliminated={player.state !== "alive"}
+          />
+        ))}
 
-      <mesh ref={playerRef} position={[startPosition.x, startPosition.y, startPosition.z]}>
-        <capsuleGeometry args={[0.32, 0.42, 6, 12]} />
-        <meshStandardMaterial color="#ffe66d" roughness={0.5} metalness={0.08} />
-      </mesh>
+      {renderShieldPickup && (
+        <ShieldPickup
+          pickup={renderShieldPickup}
+          playerPositionRef={playerPosition}
+        />
+      )}
 
-      <instancedMesh ref={warningMeshRef} args={[undefined, undefined, maxRenderedObstacles]}>
-        <circleGeometry args={[1, 36]} />
-        <meshBasicMaterial transparent opacity={1} depthWrite={false} vertexColors />
-      </instancedMesh>
+      {renderShieldBurst && (
+        <ShieldBurst
+          burst={renderShieldBurst}
+          elapsedSecondsRef={elapsed}
+        />
+      )}
 
-      <instancedMesh ref={obstacleMeshRef} args={[undefined, undefined, maxRenderedObstacles]}>
-        <dodecahedronGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#7b4b2a" roughness={0.86} metalness={0.02} />
-      </instancedMesh>
+      {renderObstacles.map((obstacle) => (
+        <DoodleHazard
+          key={obstacle.id}
+          obstacle={obstacle}
+        />
+      ))}
+
+      {phase === "playing" && !matchStartLocked &&
+        renderObstacles.map((obstacle) => (
+          <DangerRing
+            key={`${obstacle.id}-warning`}
+            obstacle={obstacle}
+          />
+        ))}
     </>
   );
 }
 
-function syncObstacleMesh(
-  mesh: InstancedMesh | null,
-  matrixObject: Object3D,
-  obstacles: Obstacle[]
-) {
-  if (!mesh) {
-    return;
+function isMultiplayerGameplayLocked(multiplayerMatch?: MultiplayerMatchConfig): boolean {
+  if (multiplayerMatch?.enabled !== true) {
+    return false;
   }
 
-  mesh.count = obstacles.length;
-  obstacles.forEach((obstacle, index) => {
-    matrixObject.position.set(obstacle.x, obstacle.y, obstacle.z);
-    matrixObject.rotation.set(
-      obstacle.rotation,
-      obstacle.rotation * 0.35,
-      obstacle.rotation * 0.22
-    );
-    matrixObject.scale.setScalar(obstacle.radius);
-    matrixObject.updateMatrix();
-    mesh.setMatrixAt(index, matrixObject.matrix);
-  });
-  mesh.instanceMatrix.needsUpdate = true;
-}
-
-function syncWarningMesh(
-  mesh: InstancedMesh | null,
-  matrixObject: Object3D,
-  colorObject: Color,
-  obstacles: Obstacle[]
-) {
-  if (!mesh) {
-    return;
+  if (multiplayerMatch.matchStartedAt === null) {
+    return true;
   }
 
-  let visibleCount = 0;
-  const maxOpacity = getWarningOpacity(GAME_TUNING.visuals.warningFullY);
-  obstacles.forEach((obstacle) => {
-    const scale = getWarningScale(obstacle.y, obstacle.radius);
-    const opacity = getWarningOpacity(obstacle.y);
-
-    if (scale <= 0 || opacity <= 0) {
-      return;
-    }
-
-    matrixObject.position.set(obstacle.x, 0.012, obstacle.z);
-    matrixObject.rotation.set(-Math.PI / 2, 0, 0);
-    matrixObject.scale.setScalar(scale);
-    matrixObject.updateMatrix();
-    mesh.setMatrixAt(visibleCount, matrixObject.matrix);
-    const intensity = Math.min(1, opacity / maxOpacity);
-    colorObject.setRGB(0.26 + intensity * 0.74, 0.04 + intensity * 0.38, 0.04 + intensity * 0.38);
-    mesh.setColorAt(visibleCount, colorObject);
-    visibleCount += 1;
-  });
-
-  mesh.count = visibleCount;
-  mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) {
-    mesh.instanceColor.needsUpdate = true;
-  }
+  return Date.now() + multiplayerMatch.serverNowOffsetMs < multiplayerMatch.matchStartedAt;
 }

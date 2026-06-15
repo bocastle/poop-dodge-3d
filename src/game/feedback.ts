@@ -2,10 +2,12 @@ import type { InputVector } from "./types";
 import { GAME_TUNING } from "./tuning";
 
 export function getPlayerLean(input: InputVector) {
+  const moving = input.x !== 0 || input.z !== 0;
+  const visualInput = clampInput(input);
   return {
-    rotationX: round(input.z * 0.16),
-    rotationY: round(input.x * -0.42),
-    scaleY: input.x !== 0 || input.z !== 0 ? 1.04 : 1,
+    rotationX: round(visualInput.z * 0.2),
+    rotationY: round(visualInput.x * -0.42),
+    scaleY: moving ? 1.06 : 1,
   };
 }
 
@@ -44,6 +46,17 @@ function getWarningProgress(obstacleY: number) {
   const range = GAME_TUNING.visuals.warningStartY - GAME_TUNING.visuals.warningFullY;
   const raw = (GAME_TUNING.visuals.warningStartY - obstacleY) / range;
   return Math.min(1, Math.max(0, raw));
+}
+
+function clampInput(input: InputVector): InputVector {
+  return {
+    x: clamp(input.x, -1, 1),
+    z: clamp(input.z, -1, 1),
+  };
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function round(value: number) {

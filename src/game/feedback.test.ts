@@ -10,9 +10,17 @@ import {
 describe("game feedback helpers", () => {
   it("leans the player based on normalized input", () => {
     expect(getPlayerLean({ x: 1, z: -1 })).toEqual({
-      rotationX: -0.16,
+      rotationX: -0.2,
       rotationY: -0.42,
-      scaleY: 1.04,
+      scaleY: 1.06,
+    });
+  });
+
+  it("clamps player lean for over-unit input", () => {
+    expect(getPlayerLean({ x: 2, z: -2 })).toEqual({
+      rotationX: -0.2,
+      rotationY: -0.42,
+      scaleY: 1.06,
     });
   });
 
