@@ -41,6 +41,14 @@ const initialStats: GameStats = {
   callout: null,
   calloutId: 0,
   calloutTone: "neutral",
+  activeWave: null,
+  feverActive: false,
+  dramaTimeScale: 1,
+  runHighlight: {
+    title: "First page",
+    detail: "Try another run.",
+    tone: "neutral",
+  },
   runSummary: {
     title: "Blank page",
     detail: "Start a run.",

@@ -9,6 +9,26 @@ export type RunSummary = {
   detail: string;
 };
 
+export type DangerWaveId = "rush" | "wideDrop" | "tinyGap" | "messyRain";
+
+export type DangerWaveTone = "rush" | "wide" | "tiny" | "messy";
+
+export type DangerWave = {
+  id: DangerWaveId;
+  title: string;
+  detail: string;
+  tone: DangerWaveTone;
+  endsAtSeconds: number;
+};
+
+export type RunHighlightTone = "neutral" | "fever" | "shield" | "panic" | "survival";
+
+export type RunHighlight = {
+  title: string;
+  detail: string;
+  tone: RunHighlightTone;
+};
+
 export type ComboState = {
   multiplier: number;
   streak: number;
@@ -94,5 +114,9 @@ export type GameStats = {
   callout: string | null;
   calloutId: number;
   calloutTone: CalloutTone;
+  activeWave?: DangerWave | null;
+  feverActive?: boolean;
+  dramaTimeScale?: number;
+  runHighlight?: RunHighlight;
   runSummary: RunSummary;
 };

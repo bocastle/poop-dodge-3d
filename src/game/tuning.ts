@@ -58,4 +58,12 @@ export const GAME_TUNING = {
     closeCallPulseSeconds: 0.62,
     panicComboSummaryMinimum: 3,
   },
+  waves: {
+    firstStartSeconds: 10,
+    intervalSeconds: 13,
+    durationSeconds: 4,
+    dramaSlowSeconds: 0.22,
+    dramaTimeScale: 0.48,
+    feverMinimumMultiplier: 3,
+  },
 } as const;

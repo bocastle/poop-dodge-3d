@@ -1,5 +1,5 @@
 import { GAME_TUNING } from "./tuning";
-import type { CalloutTone, CloseCallTier, Position, RunSummary } from "./types";
+import type { CalloutTone, CloseCallTier, Position, RunHighlight, RunSummary } from "./types";
 
 type RunSummaryInput = {
   closeCalls: number;
@@ -18,6 +18,11 @@ type PlayerResultBadgeInput = {
   totalPlayers: number;
   closeCalls: number;
   shieldSaves: number;
+};
+
+type FeverStateInput = {
+  comboMultiplier: number;
+  bestComboStreak: number;
 };
 
 type FlatPosition = Pick<Position, "x" | "z">;
@@ -117,6 +122,57 @@ export function getPlayerResultBadge(input: PlayerResultBadgeInput): string {
   }
 
   return "Still breathing";
+}
+
+export function getFeverState(input: FeverStateInput): { active: boolean; label: string } {
+  const active =
+    input.comboMultiplier >= GAME_TUNING.waves.feverMinimumMultiplier ||
+    input.bestComboStreak >= GAME_TUNING.waves.feverMinimumMultiplier;
+
+  return {
+    active,
+    label: active ? `FEVER x${input.comboMultiplier}` : `Combo x${input.comboMultiplier}`,
+  };
+}
+
+export function getRunHighlight(input: RunSummaryInput & { elapsedSeconds: number }): RunHighlight {
+  if (input.bestComboMultiplier >= GAME_TUNING.waves.feverMinimumMultiplier) {
+    return {
+      title: "Fever run",
+      detail: `Held a x${input.bestComboMultiplier} close-call chain.`,
+      tone: "fever",
+    };
+  }
+
+  if (input.shieldSaves > 0) {
+    return {
+      title: "Shield clutch",
+      detail: `${input.shieldSaves} save${input.shieldSaves === 1 ? "" : "s"} kept the run alive.`,
+      tone: "shield",
+    };
+  }
+
+  if (input.closeCalls >= GAME_TUNING.feel.panicComboSummaryMinimum) {
+    return {
+      title: "Panic dancer",
+      detail: `${input.closeCalls} close calls without folding.`,
+      tone: "panic",
+    };
+  }
+
+  if (input.dodged >= 20 || input.elapsedSeconds >= 20) {
+    return {
+      title: "Still standing",
+      detail: `${input.dodged} drops dodged before the page gave up.`,
+      tone: "survival",
+    };
+  }
+
+  return {
+    title: "First page",
+    detail: "Try another run.",
+    tone: "neutral",
+  };
 }
 
 function round(value: number) {

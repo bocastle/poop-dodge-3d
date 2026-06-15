@@ -2,7 +2,13 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type { Group } from "three";
 import { getCameraShake } from "./feedback";
-import { getCalloutTone, getRunSummary, isInsideShieldSaveClearRadius } from "./feel";
+import {
+  getCalloutTone,
+  getFeverState,
+  getRunHighlight,
+  getRunSummary,
+  isInsideShieldSaveClearRadius,
+} from "./feel";
 import {
   createInitialCombo,
   getCloseCallBonus,
@@ -35,6 +41,12 @@ import type {
   ShieldBurst as ShieldBurstData,
   ShieldPickup as ShieldPickupData,
 } from "./types";
+import {
+  applyDangerWaveToDifficulty,
+  getDangerWave,
+  getDramaTimeScale,
+  tuneObstacleForDangerWave,
+} from "./waves";
 import { DangerRing } from "./visuals/DangerRing";
 import { DoodleHazard } from "./visuals/DoodleHazard";
 import { DoodlePlayer } from "./visuals/DoodlePlayer";
@@ -81,6 +93,7 @@ export function GameScene({
   const lastLocalSnapshotAt = useRef(0);
   const gameOverSent = useRef(false);
   const impactTimer = useRef(0);
+  const dramaTimer = useRef(0);
   const freezeTimer = useRef(0);
   const bestComboMultiplier = useRef(1);
   const bestComboStreak = useRef(0);
@@ -131,6 +144,7 @@ export function GameScene({
     lastLocalSnapshotAt.current = 0;
     gameOverSent.current = false;
     impactTimer.current = 0;
+    dramaTimer.current = 0;
     freezeTimer.current = 0;
     bestComboMultiplier.current = 1;
     bestComboStreak.current = 0;
@@ -158,11 +172,17 @@ export function GameScene({
   }, [runId]);
 
   useFrame((state, delta) => {
-    const dt = Math.min(delta, 0.05);
+    const realDt = Math.min(delta, 0.05);
+    const dramaTimeScale = getDramaTimeScale(dramaTimer.current);
+    const dt = realDt * dramaTimeScale;
     const player = playerRef.current;
 
     if (!player) {
       return;
+    }
+
+    if (dramaTimer.current > 0) {
+      dramaTimer.current = Math.max(0, dramaTimer.current - realDt);
     }
 
     state.camera.position.set(cameraBasePosition.x, cameraBasePosition.y, cameraBasePosition.z);
@@ -172,13 +192,13 @@ export function GameScene({
       const shake = getCameraShake(secondsSinceImpact);
       state.camera.position.x += Math.sin(state.clock.elapsedTime * 82) * shake;
       state.camera.position.y += Math.cos(state.clock.elapsedTime * 71) * shake;
-      impactTimer.current = Math.max(0, impactTimer.current - dt);
+      impactTimer.current = Math.max(0, impactTimer.current - realDt);
     }
     state.camera.lookAt(0, 0, 0);
 
     if (freezeTimer.current > 0) {
       updatePlayerMood("shield");
-      freezeTimer.current = Math.max(0, freezeTimer.current - dt);
+      freezeTimer.current = Math.max(0, freezeTimer.current - realDt);
       state.camera.lookAt(0, 0, 0);
       return;
     }
@@ -212,7 +232,8 @@ export function GameScene({
     }
 
     elapsed.current += dt;
-    const difficulty = getDifficulty(elapsed.current);
+    const activeWave = getDangerWave(elapsed.current, runId);
+    const difficulty = applyDangerWaveToDifficulty(getDifficulty(elapsed.current), activeWave);
     playerPosition.current = movePlayer(
       playerPosition.current,
       input,
@@ -261,6 +282,20 @@ export function GameScene({
         callout: callout.current,
         calloutId: calloutId.current,
         calloutTone: calloutTone.current,
+        activeWave,
+        feverActive: getFeverState({
+          comboMultiplier: comboAlive ? combo.current.multiplier : 1,
+          bestComboStreak: bestComboStreak.current,
+        }).active,
+        dramaTimeScale,
+        runHighlight: getRunHighlight({
+          closeCalls: closeCalls.current,
+          bestComboMultiplier: bestComboMultiplier.current,
+          bestComboStreak: bestComboStreak.current,
+          shieldSaves: shieldSaves.current,
+          dodged: dodged.current,
+          elapsedSeconds: elapsed.current,
+        }),
         runSummary: getRunSummary({
           closeCalls: closeCalls.current,
           bestComboMultiplier: bestComboMultiplier.current,
@@ -299,7 +334,12 @@ export function GameScene({
         multiplayerMatch?.enabled === true && multiplayerMatch.matchSeed !== null
           ? multiplayerMatch.matchSeed
           : runId + 1;
-      obstacles.current.push(createSeededObstacle(obstacleSeed, spawnIndex.current, difficulty));
+      obstacles.current.push(
+        tuneObstacleForDangerWave(
+          createSeededObstacle(obstacleSeed, spawnIndex.current, difficulty),
+          activeWave
+        )
+      );
       spawnIndex.current += 1;
       spawnTimer.current = difficulty.spawnInterval;
       renderListChanged = true;
@@ -343,6 +383,9 @@ export function GameScene({
               : tier.toUpperCase();
           calloutId.current += 1;
           calloutTone.current = getCalloutTone(tier, combo.current.multiplier, false);
+          if (tier === "panic") {
+            dramaTimer.current = GAME_TUNING.waves.dramaSlowSeconds;
+          }
         }
       }
     }
@@ -398,6 +441,20 @@ export function GameScene({
       callout: callout.current,
       calloutId: calloutId.current,
       calloutTone: calloutTone.current,
+      activeWave,
+      feverActive: getFeverState({
+        comboMultiplier: visibleComboMultiplier,
+        bestComboStreak: bestComboStreak.current,
+      }).active,
+      dramaTimeScale,
+      runHighlight: getRunHighlight({
+        closeCalls: closeCalls.current,
+        bestComboMultiplier: bestComboMultiplier.current,
+        bestComboStreak: bestComboStreak.current,
+        shieldSaves: shieldSaves.current,
+        dodged: dodged.current,
+        elapsedSeconds: elapsed.current,
+      }),
       runSummary: getRunSummary({
         closeCalls: closeCalls.current,
         bestComboMultiplier: bestComboMultiplier.current,
@@ -423,6 +480,7 @@ export function GameScene({
           startedAtSeconds: elapsed.current,
           expiresAtSeconds: elapsed.current + GAME_TUNING.feel.shieldSaveBurstSeconds,
         };
+        dramaTimer.current = GAME_TUNING.waves.dramaSlowSeconds;
         freezeTimer.current = GAME_TUNING.feel.shieldSaveFreezeSeconds;
         setRenderShieldBurst(burst);
         obstacles.current = obstacles.current.filter(
@@ -440,6 +498,20 @@ export function GameScene({
           callout: callout.current,
           calloutId: calloutId.current,
           calloutTone: calloutTone.current,
+          activeWave,
+          feverActive: getFeverState({
+            comboMultiplier: visibleComboMultiplier,
+            bestComboStreak: bestComboStreak.current,
+          }).active,
+          dramaTimeScale: GAME_TUNING.waves.dramaTimeScale,
+          runHighlight: getRunHighlight({
+            closeCalls: closeCalls.current,
+            bestComboMultiplier: bestComboMultiplier.current,
+            bestComboStreak: bestComboStreak.current,
+            shieldSaves: shieldSaves.current,
+            dodged: dodged.current,
+            elapsedSeconds: elapsed.current,
+          }),
           runSummary: getRunSummary({
             closeCalls: closeCalls.current,
             bestComboMultiplier: bestComboMultiplier.current,

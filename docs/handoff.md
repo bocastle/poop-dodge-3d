@@ -6,7 +6,7 @@
 - Current branch: `feature/pure-doodle-redesign`
 - Integration branch: `develop`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, and Fun Feedback pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
+- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, and One More Run Loop pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
 - Stacked-work note: multiplayer work is currently stacked on top of the existing Pure Doodle/game-feel branch rather than isolated in a separate feature branch.
 - Deployment status: no deployment. The current goal is web optimization before public release.
 
@@ -41,10 +41,15 @@ The MVP now includes:
 - Faster first-run round tempo with more immediate falling hazard pressure
 - Multiplayer result headlines and per-player performance badges
 - Mascot mood states for idle, running, panic, shield, and defeated play moments
+- Short deterministic danger waves that start after the opening warmup: Rush, Wide Drop, Tiny Gap, and Messy Rain
+- Fever feedback for high close-call combos
+- Brief drama time scale for panic and shield-save moments
+- Single-player run highlight card on the retry screen
 - Multiplayer server unavailable state while preserving single-player play
 - Unit tests for movement, collision, difficulty, score, and high-score logic
 - Unit tests for doodle visual helper states and clamped player feedback
 - Unit tests for mascot mood/face mapping and game audio recipes
+- Unit tests for danger wave timing, wave difficulty pressure, wave obstacle tuning, drama time scale, fever state, and run highlight selection
 - Unit tests for close-call tiering, combo timing, bonus scoring, shield spawning, shield placement, shield collection helpers, shield pull progress, shield-save clear radius, callout tone, and run-summary copy
 - Unit tests for room code helpers, client room reducer, in-memory room state machine, Socket.IO handlers, multiplayer hook behavior, app room transitions, multiplayer panels, multiplayer result copy/badges, survivor list, and deterministic obstacle ids
 
@@ -61,7 +66,7 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Have the user review the latest C1 Pure Doodle, Game Feel Shield Impact, Multiplayer Room MVP, and Fun Feedback pass build locally.
+1. Have the user review the latest C1 Pure Doodle, Game Feel Shield Impact, Multiplayer Room MVP, Fun Feedback pass, and One More Run Loop pass build locally.
 2. If approved, commit with a Korean commit message, push `feature/pure-doodle-redesign`, then merge through `develop` according to the branch workflow.
 3. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
 4. Decide whether the next feature should focus on multiplayer UX polish, authored assets, model replacement, real-device mobile tuning, result/restart polish, or performance/code splitting.
@@ -92,7 +97,7 @@ npm run server:start
 
 - Do not deploy until the user explicitly approves deployment.
 - Do not start implementation work before the current feature design is approved.
-- The production build currently emits a large chunk warning because Three.js is bundled in the game entry. The gzipped JS is about 320.62 kB in the latest verified build.
+- The production build currently emits a large chunk warning because Three.js is bundled in the game entry. The gzipped JS is about 321.73 kB in the latest verified build.
 - Browser verification was performed in Chrome against `npm run preview`.
 - The latest mobile layout pass constrains the HUD and start/game-over panel to fit narrow browser widths without horizontal clipping.
 - The game-polish pass was browser-checked at desktop `1280x720`, mobile portrait `390x844`, and mobile landscape `667x375`; the landscape game-over panel kept the final score and restart button in view.
@@ -114,6 +119,7 @@ npm run server:start
 - Mobile touch logic is implemented, but real-device mobile testing is still recommended before public release, especially for shield pickup collection and high-pressure dodging.
 - Some large hazards can visually pass close to the top HUD at the far arena edge. This did not block play in verification, but it is a good camera/spawn-framing tuning candidate for the next polish pass.
 - The Fun Feedback pass adds lightweight generated Web Audio cues, faster initial difficulty, result flavor copy, result badges, and reactive mascot mood colors/faces.
+- The One More Run Loop pass adds deterministic short danger waves, fever chip feedback, brief drama slow motion during panic/shield-save moments, and a single-player run highlight card.
 - The game still uses procedural primitives only. The current redesign intentionally keeps authored models, image assets, login, ranking, and deployment out of scope.
 - Multiplayer uses `socket.io`, `socket.io-client`, and `tsx`.
 - Multiplayer server code lives in `server/` and uses in-memory state only. Room data is lost when the server restarts.

@@ -136,9 +136,63 @@ button:disabled {
   animation: chip-bump 560ms ease-out;
 }
 
+.status-chip.is-fever {
+  background: #fecaca;
+  color: #7f1d1d;
+  animation: chip-bump 480ms ease-out infinite;
+}
+
 .status-chip.is-shielded {
   background: #bfdbfe;
   animation: chip-bump 700ms ease-out;
+}
+
+.wave-banner {
+  pointer-events: none;
+  grid-row: 2;
+  justify-self: center;
+  align-self: end;
+  display: grid;
+  gap: 2px;
+  max-width: min(360px, calc(100vw - 36px));
+  margin-top: 42px;
+  padding: 8px 12px;
+  border: 3px solid #1f2937;
+  border-radius: 8px;
+  background: #fffdf4;
+  box-shadow: 4px 4px 0 #d6d3d1;
+  color: #1f2937;
+  text-align: center;
+  animation: wave-stamp 560ms ease-out both;
+}
+
+.wave-banner strong {
+  font-size: clamp(16px, 4vw, 24px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.wave-banner span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.wave-banner.is-rush {
+  background: #fed7aa;
+}
+
+.wave-banner.is-wide {
+  background: #fde68a;
+}
+
+.wave-banner.is-tiny {
+  background: #bfdbfe;
+}
+
+.wave-banner.is-messy {
+  background: #fecaca;
 }
 
 .hud-panel-region {
@@ -231,6 +285,17 @@ button:disabled {
     opacity: 0;
     transform: translateY(-16px) rotate(var(--callout-end-rotate))
       scale(var(--callout-end-scale));
+  }
+}
+
+@keyframes wave-stamp {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) rotate(-1deg) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
   }
 }
 
@@ -354,6 +419,48 @@ button:disabled {
   color: #111827;
   font-size: clamp(1rem, 4vw, 1.35rem);
   line-height: 1.05;
+}
+
+.run-highlight {
+  display: grid;
+  gap: 3px;
+  max-width: min(100%, 420px);
+  margin: 8px auto 0;
+  padding: 8px;
+  border: 3px solid #1f2937;
+  border-radius: 8px;
+  background: #fffdf4;
+  box-shadow: 3px 3px 0 #d6d3d1;
+}
+
+.run-highlight span {
+  color: #6b5f55;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.run-highlight strong {
+  color: #111827;
+  font-size: clamp(0.95rem, 3vw, 1.18rem);
+  line-height: 1.05;
+}
+
+.run-highlight.is-fever {
+  background: #fecaca;
+}
+
+.run-highlight.is-shield {
+  background: #bfdbfe;
+}
+
+.run-highlight.is-panic {
+  background: #fed7aa;
+}
+
+.run-highlight.is-survival {
+  background: #bbf7d0;
 }
 
 .summary {

@@ -45,6 +45,8 @@ export function GameOverlay({
       (mode === "multiplayer" &&
         (multiplayer.room.status === "playing" ||
           (multiplayer.room.status === "countdown" && localPlayerWaitingNextRound))));
+  const comboLabel =
+    stats.feverActive === true ? `FEVER x${stats.comboMultiplier}` : `Combo x${stats.comboMultiplier}`;
 
   return (
     <section className="hud">
@@ -70,10 +72,16 @@ export function GameOverlay({
       {phase === "playing" && (
         <div className="status-strip">
           <span
-            className={stats.comboMultiplier > 1 ? "status-chip is-hot" : "status-chip"}
+            className={
+              stats.feverActive === true
+                ? "status-chip is-fever"
+                : stats.comboMultiplier > 1
+                  ? "status-chip is-hot"
+                  : "status-chip"
+            }
             key={`combo-${stats.closeCalls}-${stats.comboMultiplier}`}
           >
-            Combo x{stats.comboMultiplier}
+            {comboLabel}
           </span>
           <span
             className={stats.shieldActive ? "status-chip is-shielded" : "status-chip"}
@@ -84,6 +92,13 @@ export function GameOverlay({
           <span className="status-chip" key={`close-calls-${stats.closeCalls}`}>
             {stats.closeCalls.toLocaleString()} close calls
           </span>
+        </div>
+      )}
+
+      {phase === "playing" && stats.activeWave && (
+        <div className={`wave-banner is-${stats.activeWave.tone}`} role="status" aria-live="polite">
+          <strong>{stats.activeWave.title}</strong>
+          <span>{stats.activeWave.detail}</span>
         </div>
       )}
 
@@ -144,6 +159,13 @@ export function GameOverlay({
                     <strong>{stats.runSummary.title}</strong>
                     <span>{stats.runSummary.detail}</span>
                   </p>
+                  {stats.runHighlight && (
+                    <p className={`run-highlight is-${stats.runHighlight.tone}`}>
+                      <span>Run highlight</span>
+                      <strong>{stats.runHighlight.title}</strong>
+                      <span>{stats.runHighlight.detail}</span>
+                    </p>
+                  )}
                 </>
               )}
               <p className="summary">

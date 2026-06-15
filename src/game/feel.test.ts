@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   getCalloutTone,
+  getFeverState,
   getMatchResultHeadline,
   getPlayerResultBadge,
+  getRunHighlight,
   getRunSummary,
   getShieldPullProgress,
   isInsideShieldSaveClearRadius,
@@ -135,5 +137,49 @@ describe("feel helpers", () => {
         shieldSaves: 0,
       })
     ).toBe("First splat");
+  });
+
+  it("turns high close-call combo into a visible fever state", () => {
+    expect(getFeverState({ comboMultiplier: 2, bestComboStreak: 2 })).toEqual({
+      active: false,
+      label: "Combo x2",
+    });
+
+    expect(getFeverState({ comboMultiplier: 3, bestComboStreak: 4 })).toEqual({
+      active: true,
+      label: "FEVER x3",
+    });
+  });
+
+  it("selects one memorable run highlight for the retry screen", () => {
+    expect(
+      getRunHighlight({
+        closeCalls: 2,
+        bestComboMultiplier: 4,
+        bestComboStreak: 5,
+        shieldSaves: 0,
+        dodged: 16,
+        elapsedSeconds: 18,
+      })
+    ).toEqual({
+      title: "Fever run",
+      detail: "Held a x4 close-call chain.",
+      tone: "fever",
+    });
+
+    expect(
+      getRunHighlight({
+        closeCalls: 1,
+        bestComboMultiplier: 1,
+        bestComboStreak: 1,
+        shieldSaves: 2,
+        dodged: 10,
+        elapsedSeconds: 16,
+      })
+    ).toEqual({
+      title: "Shield clutch",
+      detail: "2 saves kept the run alive.",
+      tone: "shield",
+    });
   });
 });
