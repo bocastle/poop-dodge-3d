@@ -9,6 +9,17 @@ type RunSummaryInput = {
   dodged: number;
 };
 
+type MatchHeadlinePlayer = {
+  nickname: string;
+};
+
+type PlayerResultBadgeInput = {
+  rank: number;
+  totalPlayers: number;
+  closeCalls: number;
+  shieldSaves: number;
+};
+
 type FlatPosition = Pick<Position, "x" | "z">;
 
 export function getShieldPullProgress(distance: number) {
@@ -72,6 +83,40 @@ export function getRunSummary(input: RunSummaryInput): RunSummary {
     title: "Clean paper",
     detail: `${input.dodged} drops dodged.`,
   };
+}
+
+export function getMatchResultHeadline(winner: MatchHeadlinePlayer | null): RunSummary {
+  if (winner === null) {
+    return {
+      title: "No clean winner",
+      detail: "The page got everybody.",
+    };
+  }
+
+  return {
+    title: `${winner.nickname} owns the page`,
+    detail: "Everyone else got folded.",
+  };
+}
+
+export function getPlayerResultBadge(input: PlayerResultBadgeInput): string {
+  if (input.rank === 1) {
+    return "Crown dodger";
+  }
+
+  if (input.closeCalls >= 4) {
+    return "Danger magnet";
+  }
+
+  if (input.shieldSaves > 0) {
+    return "Shield clutch";
+  }
+
+  if (input.rank === input.totalPlayers && input.totalPlayers > 1) {
+    return "First splat";
+  }
+
+  return "Still breathing";
 }
 
 function round(value: number) {

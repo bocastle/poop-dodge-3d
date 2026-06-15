@@ -504,6 +504,9 @@ describe("MultiplayerPanel", () => {
     );
 
     expect(html).toContain("Winner");
+    expect(html).toContain("Guest owns the page");
+    expect(html).toContain("Crown dodger");
+    expect(html).toContain("Danger magnet");
     expect(html).toContain("Guest");
     expect(html).toContain("Close calls");
     expect(html).toContain("Shield saves");

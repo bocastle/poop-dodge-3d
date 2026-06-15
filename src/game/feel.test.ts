@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   getCalloutTone,
+  getMatchResultHeadline,
+  getPlayerResultBadge,
   getRunSummary,
   getShieldPullProgress,
   isInsideShieldSaveClearRadius,
@@ -86,5 +88,52 @@ describe("feel helpers", () => {
       title: "Risky doodler",
       detail: "4 close calls without blinking.",
     });
+  });
+
+  it("adds sharper multiplayer winner copy", () => {
+    expect(getMatchResultHeadline({ nickname: "Guest" })).toEqual({
+      title: "Guest owns the page",
+      detail: "Everyone else got folded.",
+    });
+
+    expect(getMatchResultHeadline(null)).toEqual({
+      title: "No clean winner",
+      detail: "The page got everybody.",
+    });
+  });
+
+  it("tags result rows with playful performance badges", () => {
+    expect(
+      getPlayerResultBadge({
+        rank: 1,
+        totalPlayers: 4,
+        closeCalls: 2,
+        shieldSaves: 0,
+      })
+    ).toBe("Crown dodger");
+    expect(
+      getPlayerResultBadge({
+        rank: 2,
+        totalPlayers: 4,
+        closeCalls: 5,
+        shieldSaves: 0,
+      })
+    ).toBe("Danger magnet");
+    expect(
+      getPlayerResultBadge({
+        rank: 3,
+        totalPlayers: 4,
+        closeCalls: 1,
+        shieldSaves: 2,
+      })
+    ).toBe("Shield clutch");
+    expect(
+      getPlayerResultBadge({
+        rank: 4,
+        totalPlayers: 4,
+        closeCalls: 0,
+        shieldSaves: 0,
+      })
+    ).toBe("First splat");
   });
 });

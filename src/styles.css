@@ -551,10 +551,22 @@ button:disabled {
 }
 
 .winner-copy {
+  display: grid;
+  gap: 3px;
   min-height: 0;
   color: #1f2937;
-  font-size: 24px;
   overflow-wrap: anywhere;
+}
+
+.winner-copy strong {
+  font-size: clamp(20px, 5vw, 27px);
+  line-height: 1.05;
+}
+
+.winner-copy span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .countdown-card {
@@ -604,6 +616,18 @@ button:disabled {
 .match-result-list span:nth-child(n + 4) {
   color: #64748b;
   font-weight: 800;
+}
+
+.match-result-list .result-badge {
+  justify-self: start;
+  padding: 2px 6px;
+  border: 2px solid #1f2937;
+  border-radius: 999px;
+  background: #bfdbfe;
+  color: #1f2937;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .survivor-list {

@@ -69,6 +69,15 @@ describe("game logic", () => {
     expect(late.maxObstacles).toBeGreaterThan(start.maxObstacles);
   });
 
+  it("starts rounds with quicker pressure for first-run fun", () => {
+    const start = getDifficulty(0);
+    const fiveSeconds = getDifficulty(5);
+
+    expect(start.fallSpeed).toBeGreaterThanOrEqual(3.7);
+    expect(start.spawnInterval).toBeLessThanOrEqual(0.68);
+    expect(fiveSeconds.maxObstacles).toBeGreaterThanOrEqual(16);
+  });
+
   it("keeps difficulty within tuned limits", () => {
     const start = getDifficulty(0);
     const late = getDifficulty(90);

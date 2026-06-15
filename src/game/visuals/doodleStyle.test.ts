@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   getDoodleOutlineScale,
+  getDoodlePlayerFace,
+  getDoodlePlayerMood,
   getDoodlePlayerMotion,
   getDoodleWarningState,
   getHazardVisualState,
@@ -42,6 +44,45 @@ describe("doodle visual style helpers", () => {
       rotationZ: 0,
       scaleY: 1,
       moving: false,
+    });
+  });
+
+  it("switches player mood for shield, panic, and defeat states", () => {
+    expect(
+      getDoodlePlayerMood({
+        phase: "playing",
+        moving: true,
+        shieldActive: true,
+        calloutTone: "neutral",
+      })
+    ).toBe("shield");
+    expect(
+      getDoodlePlayerMood({
+        phase: "playing",
+        moving: true,
+        shieldActive: false,
+        calloutTone: "panic",
+      })
+    ).toBe("panic");
+    expect(
+      getDoodlePlayerMood({
+        phase: "game-over",
+        moving: false,
+        shieldActive: false,
+        calloutTone: "neutral",
+      })
+    ).toBe("defeated");
+  });
+
+  it("maps player mood to readable face styling", () => {
+    expect(getDoodlePlayerFace("panic")).toMatchObject({
+      bodyColor: "#fed7aa",
+      eyeScaleY: 1.55,
+      mouth: "open",
+    });
+    expect(getDoodlePlayerFace("shield")).toMatchObject({
+      bodyColor: "#bbf7d0",
+      mouth: "smile",
     });
   });
 

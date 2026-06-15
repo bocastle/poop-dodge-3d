@@ -1,5 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { playGameSound, primeGameAudio } from "../game/audio";
 import { GameScene } from "../game/GameScene";
 import { useKeyboardControls } from "../game/input/useKeyboardControls";
 import { useTouchControls } from "../game/input/useTouchControls";
@@ -77,6 +78,8 @@ export function App() {
   const [stats, setStats] = useState<GameStats>(initialStats);
   const [survivorListOpen, setSurvivorListOpen] = useState(getInitialSurvivorListOpen);
   const lastStartedRound = useRef<LastStartedMultiplayerRound | null>(null);
+  const lastSoundCalloutId = useRef(0);
+  const lastResultSoundKey = useRef<string | null>(null);
   const returnToSingleAfterLeave = useRef(false);
   const keyboardInput = useKeyboardControls(phase === "playing");
   const touchControls = useTouchControls(phase === "playing");
@@ -118,6 +121,8 @@ export function App() {
   );
 
   const startGame = useCallback(() => {
+    primeGameAudio();
+    playGameSound("roundStart");
     setMode("single");
     lastStartedRound.current = null;
     returnToSingleAfterLeave.current = false;
@@ -130,6 +135,7 @@ export function App() {
   }, []);
 
   const selectMultiplayer = useCallback(() => {
+    primeGameAudio();
     setMode("multiplayer");
     setPhase("ready");
   }, []);
@@ -156,6 +162,21 @@ export function App() {
   }, []);
 
   const handleStatsChange = useCallback((nextStats: GameStats) => {
+    if (
+      nextStats.calloutId !== 0 &&
+      nextStats.calloutId !== lastSoundCalloutId.current
+    ) {
+      lastSoundCalloutId.current = nextStats.calloutId;
+
+      if (nextStats.calloutTone === "shield") {
+        playGameSound(nextStats.callout === "SHIELD SAVE!" ? "shieldSave" : "shieldPickup");
+      } else if (nextStats.calloutTone === "panic") {
+        playGameSound("panic");
+      } else if (nextStats.callout !== null) {
+        playGameSound("closeCall");
+      }
+    }
+
     setStats((current) => ({
       ...nextStats,
       highScore: current.highScore,
@@ -179,6 +200,8 @@ export function App() {
 
   const handleGameOver = useCallback(
     (finalStats: GameStats) => {
+      playGameSound("gameOver");
+
       if (!shouldWriteSinglePlayerHighScore(mode)) {
         setStats((current) => ({
           ...finalStats,
@@ -203,6 +226,7 @@ export function App() {
 
     if (room === null) {
       lastStartedRound.current = null;
+      lastResultSoundKey.current = null;
       if (returnToSingleAfterLeave.current) {
         returnToSingleAfterLeave.current = false;
         setMode("single");
@@ -228,6 +252,8 @@ export function App() {
     );
 
     if (transition.shouldStartRound) {
+      lastSoundCalloutId.current = 0;
+      lastResultSoundKey.current = null;
       lastStartedRound.current = {
         roomCode: room.roomCode,
         roundId: room.roundId,
@@ -237,6 +263,19 @@ export function App() {
         highScore: Math.max(current.highScore, readHighScore()),
       }));
       setRunId((current) => current + 1);
+    }
+
+    if (room.status === "results") {
+      const resultSoundKey = `${room.roomCode}:${room.roundId}:${room.winnerId ?? "none"}`;
+      if (
+        resultSoundKey !== lastResultSoundKey.current &&
+        room.winnerId === multiplayer.localPlayerId
+      ) {
+        lastResultSoundKey.current = resultSoundKey;
+        playGameSound("winner");
+      }
+    } else {
+      lastResultSoundKey.current = null;
     }
 
     setPhase(transition.phase);

@@ -42,6 +42,7 @@ import { PaperArena } from "./visuals/PaperArena";
 import { RemoteDoodlePlayer } from "./visuals/RemoteDoodlePlayer";
 import { ShieldBurst } from "./visuals/ShieldBurst";
 import { ShieldPickup } from "./visuals/ShieldPickup";
+import { getDoodlePlayerMood, type DoodlePlayerMood } from "./visuals/doodleStyle";
 
 const startPosition: Position = { x: 0, y: GAME_TUNING.player.startY, z: 0 };
 const maxRenderedObstacles = GAME_TUNING.visuals.maxRenderedObstacles;
@@ -96,7 +97,9 @@ export function GameScene({
   const callout = useRef<string | null>(null);
   const calloutId = useRef(0);
   const matchStartLockedRef = useRef(false);
+  const playerMoodRef = useRef<DoodlePlayerMood>("idle");
   const [matchStartLocked, setMatchStartLocked] = useState(false);
+  const [playerMood, setPlayerMoodState] = useState<DoodlePlayerMood>("idle");
 
   const updateMatchStartLocked = (isLocked: boolean) => {
     if (matchStartLockedRef.current === isLocked) {
@@ -105,6 +108,15 @@ export function GameScene({
 
     matchStartLockedRef.current = isLocked;
     setMatchStartLocked(isLocked);
+  };
+
+  const updatePlayerMood = (mood: DoodlePlayerMood) => {
+    if (playerMoodRef.current === mood) {
+      return;
+    }
+
+    playerMoodRef.current = mood;
+    setPlayerMoodState(mood);
   };
 
   useEffect(() => {
@@ -136,6 +148,8 @@ export function GameScene({
     calloutId.current = 0;
     matchStartLockedRef.current = false;
     setMatchStartLocked(false);
+    playerMoodRef.current = "idle";
+    setPlayerMoodState("idle");
     if (playerRef.current) {
       playerRef.current.position.set(startPosition.x, startPosition.y, startPosition.z);
       playerRef.current.rotation.set(0, 0, 0);
@@ -163,6 +177,7 @@ export function GameScene({
     state.camera.lookAt(0, 0, 0);
 
     if (freezeTimer.current > 0) {
+      updatePlayerMood("shield");
       freezeTimer.current = Math.max(0, freezeTimer.current - dt);
       state.camera.lookAt(0, 0, 0);
       return;
@@ -170,6 +185,14 @@ export function GameScene({
 
     if (phase !== "playing") {
       updateMatchStartLocked(false);
+      updatePlayerMood(
+        getDoodlePlayerMood({
+          phase,
+          moving: false,
+          shieldActive: shieldActive.current,
+          calloutTone: calloutTone.current,
+        })
+      );
       player.rotation.x = 0;
       player.rotation.z = 0;
       player.scale.set(1, 1, 1);
@@ -180,6 +203,7 @@ export function GameScene({
     const gameplayLocked = isMultiplayerGameplayLocked(multiplayerMatch);
     updateMatchStartLocked(gameplayLocked);
     if (gameplayLocked) {
+      updatePlayerMood("idle");
       player.rotation.x = 0;
       player.rotation.z = 0;
       player.scale.set(1, 1, 1);
@@ -338,6 +362,15 @@ export function GameScene({
       setRenderObstacles([...obstacles.current]);
     }
 
+    updatePlayerMood(
+      getDoodlePlayerMood({
+        phase,
+        moving: input.x !== 0 || input.z !== 0,
+        shieldActive: shieldActive.current,
+        calloutTone: calloutTone.current,
+      })
+    );
+
     const hit = obstacles.current.some((obstacle) =>
       isCollision(
         playerPosition.current,
@@ -452,6 +485,7 @@ export function GameScene({
       <DoodlePlayer
         ref={playerRef}
         input={input}
+        mood={playerMood}
         phase={matchStartLocked ? "ready" : phase}
       />
 

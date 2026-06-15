@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { playGameSound, primeGameAudio } from "../game/audio";
+import { getMatchResultHeadline, getPlayerResultBadge } from "../game/feel";
 import type { UseMultiplayerRoomResult } from "../multiplayer/useMultiplayerRoom";
 import type {
   MultiplayerPlayer,
@@ -71,6 +73,7 @@ export function MultiplayerPanel({
     }
 
     setIsSubmitting(true);
+    primeGameAudio();
     multiplayer.createRoom();
   }
 
@@ -80,6 +83,7 @@ export function MultiplayerPanel({
     }
 
     setIsSubmitting(true);
+    primeGameAudio();
     multiplayer.joinRoom(roomCode);
   }
 
@@ -240,6 +244,10 @@ function LobbyPanel({
   onStart,
 }: RoomPanelProps) {
   const isHost = localPlayerId === room.hostId;
+  const handleStart = (): void => {
+    primeGameAudio();
+    onStart();
+  };
 
   return (
     <>
@@ -250,7 +258,7 @@ function LobbyPanel({
           <button
             className="primary-action paper-action"
             type="button"
-            onClick={onStart}
+            onClick={handleStart}
             disabled={isBusy}
           >
             Start
@@ -306,6 +314,16 @@ function CountdownPanel({
   onLeave: () => void;
 }) {
   const countdownText = getCountdownText(room, now);
+  const lastCountdownSound = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (countdownText === "Ready" || lastCountdownSound.current === countdownText) {
+      return;
+    }
+
+    lastCountdownSound.current = countdownText;
+    playGameSound(countdownText === "START" ? "roundStart" : "countdownTick");
+  }, [countdownText]);
 
   return (
     <>
@@ -369,6 +387,7 @@ function ResultsPanel({
 }: RoomPanelProps) {
   const winner = room.players.find((player) => player.id === room.winnerId);
   const isHost = localPlayerId === room.hostId;
+  const resultHeadline = getMatchResultHeadline(winner ?? null);
   const rankedPlayers = useMemo(
     () =>
       [...room.players].sort((firstPlayer, secondPlayer) => {
@@ -388,9 +407,12 @@ function ResultsPanel({
         title={winner === undefined ? "No winner" : "Winner"}
         roomCode={room.roomCode}
       />
-      <p className="winner-copy">{winner === undefined ? "No winner" : winner.nickname}</p>
+      <p className="winner-copy">
+        <strong>{resultHeadline.title}</strong>
+        <span>{resultHeadline.detail}</span>
+      </p>
       <ol className="match-result-list" aria-label="Match results">
-        {rankedPlayers.map((player) => (
+        {rankedPlayers.map((player, index) => (
           <li key={player.id}>
             <span className="result-name" title={player.nickname}>
               {player.nickname}
@@ -398,6 +420,14 @@ function ResultsPanel({
             </span>
             <strong>{player.score.toLocaleString()}</strong>
             <span>{Math.floor(player.elapsedSeconds)}s</span>
+            <span className="result-badge">
+              {getPlayerResultBadge({
+                rank: index + 1,
+                totalPlayers: rankedPlayers.length,
+                closeCalls: player.closeCalls,
+                shieldSaves: player.shieldSaves,
+              })}
+            </span>
             <span>{player.closeCalls.toLocaleString()} Close calls</span>
             <span>{player.shieldSaves.toLocaleString()} Shield saves</span>
           </li>
@@ -408,7 +438,10 @@ function ResultsPanel({
           <button
             className="primary-action paper-action"
             type="button"
-            onClick={onStart}
+            onClick={() => {
+              primeGameAudio();
+              onStart();
+            }}
             disabled={isBusy}
           >
             Start next round
