@@ -1,7 +1,12 @@
-import { describe, expect, it } from "vitest";
-import { getGameSoundSequence } from "./audio";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getGameSoundSequence, playGameSound, setGameSoundEnabled } from "./audio";
 
 describe("game audio recipes", () => {
+  afterEach(() => {
+    setGameSoundEnabled(true);
+    vi.unstubAllGlobals();
+  });
+
   it("uses short arcade ticks for multiplayer countdown", () => {
     expect(getGameSoundSequence("countdownTick")).toMatchObject({
       gain: 0.08,
@@ -18,5 +23,15 @@ describe("game audio recipes", () => {
 
     expect(shieldSave.gain).toBeGreaterThan(closeCall.gain);
     expect(shieldSave.tones[0]?.frequency).toBeLessThan(closeCall.tones[0]?.frequency ?? 0);
+  });
+
+  it("does not create an audio context while sound is disabled", () => {
+    const audioContextSpy = vi.fn();
+    vi.stubGlobal("window", { AudioContext: audioContextSpy });
+
+    setGameSoundEnabled(false);
+    playGameSound("roundStart");
+
+    expect(audioContextSpy).not.toHaveBeenCalled();
   });
 });

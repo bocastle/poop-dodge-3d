@@ -6,7 +6,7 @@
 - Current branch: `feature/pure-doodle-redesign`
 - Integration branch: `develop`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, and One More Run Loop pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
+- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, and Web Open Readiness pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
 - Stacked-work note: multiplayer work is currently stacked on top of the existing Pure Doodle/game-feel branch rather than isolated in a separate feature branch.
 - Deployment status: no deployment. The current goal is web optimization before public release.
 
@@ -38,6 +38,7 @@ The MVP now includes:
 - Desktop survivor list and mobile collapsed survivor list
 - Multiplayer results screen with winner and player metrics
 - Short Web Audio sound cues for round start, countdown, close calls, panic, shield pickup, shield save, game over, and winner feedback
+- Persisted footer sound toggle that gates Web Audio without blocking gameplay
 - Faster first-run round tempo with more immediate falling hazard pressure
 - Multiplayer result headlines and per-player performance badges
 - Mascot mood states for idle, running, panic, shield, and defeated play moments
@@ -52,6 +53,7 @@ The MVP now includes:
 - Unit tests for danger wave timing, wave difficulty pressure, wave obstacle tuning, drama time scale, fever state, and run highlight selection
 - Unit tests for close-call tiering, combo timing, bonus scoring, shield spawning, shield placement, shield collection helpers, shield pull progress, shield-save clear radius, callout tone, and run-summary copy
 - Unit tests for room code helpers, client room reducer, in-memory room state machine, Socket.IO handlers, multiplayer hook behavior, app room transitions, multiplayer panels, multiplayer result copy/badges, survivor list, and deterministic obstacle ids
+- Unit tests for persisted sound preference and disabled-audio behavior
 
 ## Working Agreement
 
@@ -66,10 +68,10 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Have the user review the latest C1 Pure Doodle, Game Feel Shield Impact, Multiplayer Room MVP, Fun Feedback pass, and One More Run Loop pass build locally.
+1. Have the user review the latest C1 Pure Doodle, Game Feel Shield Impact, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, and Web Open Readiness pass build locally.
 2. If approved, commit with a Korean commit message, push `feature/pure-doodle-redesign`, then merge through `develop` according to the branch workflow.
 3. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
-4. Decide whether the next feature should focus on multiplayer UX polish, authored assets, model replacement, real-device mobile tuning, result/restart polish, or performance/code splitting.
+4. Decide whether the next feature should focus on multiplayer UX polish, authored assets, model replacement, real-device mobile tuning, result/restart polish, or deeper renderer performance work.
 5. Decide later whether `main` should receive the MVP after user review.
 
 ## Useful Commands
@@ -97,7 +99,13 @@ npm run server:start
 
 - Do not deploy until the user explicitly approves deployment.
 - Do not start implementation work before the current feature design is approved.
-- The production build currently emits a large chunk warning because Three.js is bundled in the game entry. The gzipped JS is about 321.73 kB in the latest verified build.
+- The Web Open Readiness pass added `GameScene` lazy loading, explicit vendor chunking, and a 3D-vendor-aware chunk warning limit. The latest verified build has no Vite chunk warning.
+- Latest verified production build sizes: app entry `36.20 kB` / gzip `10.70 kB`, `GameScene` `23.97 kB` / gzip `6.24 kB`, `vendor-react` `178.29 kB` / gzip `55.96 kB`, `vendor-r3f` `875.59 kB` / gzip `233.01 kB`.
+- `vendor-r3f` remains the dominant payload because the app is a Three/R3F game. It is now isolated as a cacheable vendor chunk rather than mixed into the app entry.
+- The Web Open Readiness pass added a persisted sound toggle in the footer. It stores `poop-dodge-3d:sound-enabled` in `localStorage`, defaults to enabled, and prevents Web Audio context creation while disabled.
+- The Web Open Readiness pass also tightened reduced-motion CSS so chip, wave, and callout animations are disabled under `prefers-reduced-motion: reduce`.
+- Browser verification for the Web Open Readiness pass used `npm run preview` at desktop size and mobile `390x844`. Ready controls rendered, the sound toggle switched from `Sound on` to `Sound off`, mobile scroll dimensions matched the viewport, and no browser console errors were found.
+- Browser verification found that the footer sound toggle was visible but not clickable because the HUD disables pointer events. `.controls` now explicitly enables pointer events.
 - Browser verification was performed in Chrome against `npm run preview`.
 - The latest mobile layout pass constrains the HUD and start/game-over panel to fit narrow browser widths without horizontal clipping.
 - The game-polish pass was browser-checked at desktop `1280x720`, mobile portrait `390x844`, and mobile landscape `667x375`; the landscape game-over panel kept the final score and restart button in view.

@@ -851,6 +851,7 @@ button:disabled {
 }
 
 .controls {
+  pointer-events: auto;
   grid-row: 4;
   align-self: end;
   justify-self: center;
@@ -869,6 +870,37 @@ button:disabled {
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 4px 4px 0 #d6d3d1;
   color: #1f2937;
+}
+
+.sound-toggle {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 3px solid #1f2937;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 4px 4px 0 #d6d3d1;
+  color: #1f2937;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease;
+}
+
+.sound-toggle.is-on {
+  background: #dcfce7;
+}
+
+.sound-toggle:active {
+  box-shadow: 2px 2px 0 #d6d3d1;
+  transform: translate(2px, 2px);
+}
+
+.sound-toggle:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
 }
 
 @media (max-width: 620px) {
@@ -1096,20 +1128,25 @@ button:disabled {
   .controls span {
     padding: 5px 8px;
   }
+
+  .sound-toggle {
+    min-height: 30px;
+    padding: 5px 8px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .primary-action,
-  .paper-action {
+  .paper-action,
+  .sound-toggle {
     transition: none;
   }
 
   .status-chip.is-hot,
-  .status-chip.is-shielded {
-    animation: none;
-  }
-
+  .status-chip.is-fever,
+  .status-chip.is-shielded,
+  .wave-banner,
   .doodle-callout {
-    animation: doodle-fade 700ms ease-out both;
+    animation: none;
   }
 }

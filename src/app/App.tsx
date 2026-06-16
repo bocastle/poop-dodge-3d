@@ -1,11 +1,11 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { playGameSound, primeGameAudio } from "../game/audio";
-import { GameScene } from "../game/GameScene";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { playGameSound, primeGameAudio, setGameSoundEnabled } from "../game/audio";
 import { useKeyboardControls } from "../game/input/useKeyboardControls";
 import { useTouchControls } from "../game/input/useTouchControls";
 import { GameOverlay } from "../ui/GameOverlay";
 import { readHighScore, writeHighScore } from "../game/storage/highScore";
+import { readSoundEnabled, writeSoundEnabled } from "../game/storage/soundPreference";
 import { useMultiplayerRoom } from "../multiplayer/useMultiplayerRoom";
 import type {
   GamePhase,
@@ -26,6 +26,10 @@ import {
   shouldCollapseSurvivorListForViewport,
   survivorListMobileQuery,
 } from "./survivorListViewport";
+
+const GameScene = lazy(() =>
+  import("../game/GameScene").then((module) => ({ default: module.GameScene }))
+);
 
 const initialStats: GameStats = {
   score: 0,
@@ -84,6 +88,7 @@ export function App() {
   const [phase, setPhase] = useState<GamePhase>("ready");
   const [runId, setRunId] = useState(0);
   const [stats, setStats] = useState<GameStats>(initialStats);
+  const [soundEnabled, setSoundEnabled] = useState(readSoundEnabled);
   const [survivorListOpen, setSurvivorListOpen] = useState(getInitialSurvivorListOpen);
   const lastStartedRound = useRef<LastStartedMultiplayerRound | null>(null);
   const lastSoundCalloutId = useRef(0);
@@ -98,6 +103,11 @@ export function App() {
       highScore: readHighScore(),
     }));
   }, []);
+
+  useEffect(() => {
+    setGameSoundEnabled(soundEnabled);
+    writeSoundEnabled(soundEnabled);
+  }, [soundEnabled]);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -167,6 +177,10 @@ export function App() {
 
   const toggleSurvivorList = useCallback(() => {
     setSurvivorListOpen((current) => !current);
+  }, []);
+
+  const toggleSound = useCallback(() => {
+    setSoundEnabled((current) => !current);
   }, []);
 
   const handleStatsChange = useCallback((nextStats: GameStats) => {
@@ -339,6 +353,8 @@ export function App() {
         touchActive={touchControls.active}
         multiplayer={multiplayer}
         survivorListCollapsed={!survivorListOpen}
+        soundEnabled={soundEnabled}
+        onToggleSound={toggleSound}
         onToggleSurvivorList={toggleSurvivorList}
         onStartSingle={startGame}
         onSelectMultiplayer={selectMultiplayer}

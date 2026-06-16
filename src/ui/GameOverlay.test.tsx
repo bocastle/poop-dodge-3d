@@ -114,6 +114,8 @@ describe("GameOverlay", () => {
         touchActive={false}
         multiplayer={createMultiplayer(createRoom("playing"))}
         survivorListCollapsed={false}
+        soundEnabled
+        onToggleSound={() => undefined}
         onToggleSurvivorList={() => undefined}
         onStartSingle={() => undefined}
         onSelectMultiplayer={() => undefined}
@@ -137,6 +139,8 @@ describe("GameOverlay", () => {
         touchActive={false}
         multiplayer={createMultiplayer(createRoom("playing"))}
         survivorListCollapsed
+        soundEnabled
+        onToggleSound={() => undefined}
         onToggleSurvivorList={() => undefined}
         onStartSingle={() => undefined}
         onSelectMultiplayer={() => undefined}
@@ -162,6 +166,8 @@ describe("GameOverlay", () => {
           ])
         )}
         survivorListCollapsed={false}
+        soundEnabled
+        onToggleSound={() => undefined}
         onToggleSurvivorList={() => undefined}
         onStartSingle={() => undefined}
         onSelectMultiplayer={() => undefined}
@@ -186,6 +192,8 @@ describe("GameOverlay", () => {
         touchActive={false}
         multiplayer={createMultiplayer(createRoom("results"))}
         survivorListCollapsed={false}
+        soundEnabled
+        onToggleSound={() => undefined}
         onToggleSurvivorList={() => undefined}
         onStartSingle={() => undefined}
         onSelectMultiplayer={() => undefined}
@@ -220,6 +228,8 @@ describe("GameOverlay", () => {
         touchActive={false}
         multiplayer={createMultiplayer(createRoom("lobby"))}
         survivorListCollapsed={false}
+        soundEnabled
+        onToggleSound={() => undefined}
         onToggleSurvivorList={() => undefined}
         onStartSingle={() => undefined}
         onSelectMultiplayer={() => undefined}
@@ -250,6 +260,8 @@ describe("GameOverlay", () => {
         touchActive={false}
         multiplayer={createMultiplayer(createRoom("lobby"))}
         survivorListCollapsed={false}
+        soundEnabled
+        onToggleSound={() => undefined}
         onToggleSurvivorList={() => undefined}
         onStartSingle={() => undefined}
         onSelectMultiplayer={() => undefined}
@@ -261,5 +273,51 @@ describe("GameOverlay", () => {
     expect(html).toContain("Run highlight");
     expect(html).toContain("Fever run");
     expect(html).toContain("Held a x4 close-call chain.");
+  });
+
+  it("shows sound enabled state in the footer controls", () => {
+    const html = renderToStaticMarkup(
+      <GameOverlay
+        mode="single"
+        phase="ready"
+        stats={stats}
+        touchActive={false}
+        multiplayer={createMultiplayer(createRoom("lobby"))}
+        survivorListCollapsed={false}
+        soundEnabled
+        onToggleSound={() => undefined}
+        onToggleSurvivorList={() => undefined}
+        onStartSingle={() => undefined}
+        onSelectMultiplayer={() => undefined}
+        onBackToSingle={noop}
+        onLeaveMultiplayerRoom={noop}
+      />
+    );
+
+    expect(html).toContain("Sound on");
+    expect(html).toContain('aria-pressed="true"');
+  });
+
+  it("shows sound disabled state in the footer controls", () => {
+    const html = renderToStaticMarkup(
+      <GameOverlay
+        mode="single"
+        phase="ready"
+        stats={stats}
+        touchActive={false}
+        multiplayer={createMultiplayer(createRoom("lobby"))}
+        survivorListCollapsed={false}
+        soundEnabled={false}
+        onToggleSound={() => undefined}
+        onToggleSurvivorList={() => undefined}
+        onStartSingle={() => undefined}
+        onSelectMultiplayer={() => undefined}
+        onBackToSingle={noop}
+        onLeaveMultiplayerRoom={noop}
+      />
+    );
+
+    expect(html).toContain("Sound off");
+    expect(html).toContain('aria-pressed="false"');
   });
 });

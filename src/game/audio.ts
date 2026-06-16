@@ -20,6 +20,7 @@ export type GameSoundSequence = {
 };
 
 let audioContext: AudioContext | null = null;
+let soundEnabled = true;
 
 export function getGameSoundSequence(event: GameSoundEvent): GameSoundSequence {
   switch (event) {
@@ -89,11 +90,23 @@ export function getGameSoundSequence(event: GameSoundEvent): GameSoundSequence {
 }
 
 export function primeGameAudio(): void {
+  if (!soundEnabled) {
+    return;
+  }
+
   const context = getAudioContext();
   void context?.resume();
 }
 
+export function setGameSoundEnabled(enabled: boolean): void {
+  soundEnabled = enabled;
+}
+
 export function playGameSound(event: GameSoundEvent): void {
+  if (!soundEnabled) {
+    return;
+  }
+
   const context = getAudioContext();
   if (context === null) {
     return;

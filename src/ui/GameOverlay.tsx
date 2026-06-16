@@ -12,6 +12,8 @@ type GameOverlayProps = {
   touchActive: boolean;
   multiplayer: UseMultiplayerRoomResult;
   survivorListCollapsed: boolean;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
   onToggleSurvivorList: () => void;
   onStartSingle: () => void;
   onSelectMultiplayer: () => void;
@@ -26,6 +28,8 @@ export function GameOverlay({
   touchActive,
   multiplayer,
   survivorListCollapsed,
+  soundEnabled,
+  onToggleSound,
   onToggleSurvivorList,
   onStartSingle,
   onSelectMultiplayer,
@@ -201,6 +205,14 @@ export function GameOverlay({
       <footer className="controls">
         <span>WASD / Arrow keys</span>
         <span>{touchActive ? "Touch active" : "Drag on mobile"}</span>
+        <button
+          className={soundEnabled ? "sound-toggle is-on" : "sound-toggle"}
+          type="button"
+          onClick={onToggleSound}
+          aria-pressed={soundEnabled}
+        >
+          {soundEnabled ? "Sound on" : "Sound off"}
+        </button>
       </footer>
     </section>
   );
