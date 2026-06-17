@@ -6,7 +6,7 @@
 - Current branch: `feature/pure-doodle-redesign`
 - Integration branch: `develop`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, and Web Open Readiness pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
+- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, and Web Open Stability QA pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
 - Stacked-work note: multiplayer work is currently stacked on top of the existing Pure Doodle/game-feel branch rather than isolated in a separate feature branch.
 - Deployment status: no deployment. The current goal is web optimization before public release.
 
@@ -47,6 +47,9 @@ The MVP now includes:
 - Brief drama time scale for panic and shield-save moments
 - Single-player run highlight card on the retry screen
 - Multiplayer server unavailable state while preserving single-player play
+- Visible `GameScene` lazy-loading fallback so first load does not appear blank
+- Clear multiplayer connection failure copy that tells users single-player still works
+- Web open QA checklist at `docs/web-open-checklist.md`
 - Unit tests for movement, collision, difficulty, score, and high-score logic
 - Unit tests for doodle visual helper states and clamped player feedback
 - Unit tests for mascot mood/face mapping and game audio recipes
@@ -106,6 +109,10 @@ npm run server:start
 - The Web Open Readiness pass also tightened reduced-motion CSS so chip, wave, and callout animations are disabled under `prefers-reduced-motion: reduce`.
 - Browser verification for the Web Open Readiness pass used `npm run preview` at desktop size and mobile `390x844`. Ready controls rendered, the sound toggle switched from `Sound on` to `Sound off`, mobile scroll dimensions matched the viewport, and no browser console errors were found.
 - Browser verification found that the footer sound toggle was visible but not clickable because the HUD disables pointer events. `.controls` now explicitly enables pointer events.
+- The Web Open Stability QA pass added a `LoadingFallback` component for the lazy `GameScene`, updated multiplayer connection failure messages to preserve the single-player path, and added `docs/web-open-checklist.md`.
+- The updated multiplayer connection copy is covered by `src/multiplayer/useMultiplayerRoom.test.ts`; the loading fallback copy is covered by `src/ui/LoadingFallback.test.tsx`.
+- Browser verification for the Web Open Stability QA pass found that DOM fallback content cannot be rendered inside the React Three Fiber `Canvas` `Suspense` boundary. Canvas fallback is now `null`, and the DOM loading panel renders through `.scene-loading-layer` outside Canvas.
+- Browser verification for the Web Open Stability QA pass used `npm run preview` at desktop size and mobile `390x844`; ready controls rendered, mobile scroll dimensions matched the viewport, and no fresh console errors were found after the Canvas fallback fix.
 - Browser verification was performed in Chrome against `npm run preview`.
 - The latest mobile layout pass constrains the HUD and start/game-over panel to fit narrow browser widths without horizontal clipping.
 - The game-polish pass was browser-checked at desktop `1280x720`, mobile portrait `390x844`, and mobile landscape `667x375`; the landscape game-over panel kept the final score and restart button in view.

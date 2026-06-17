@@ -52,6 +52,16 @@ button:disabled {
   display: block;
 }
 
+.scene-loading-layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+}
+
 .hud {
   pointer-events: none;
   position: absolute;
@@ -209,6 +219,35 @@ button:disabled {
 
 .game-shell:not([data-phase="playing"]) .hud-panel-region {
   pointer-events: auto;
+}
+
+.loading-fallback {
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  gap: 5px;
+  width: min(320px, calc(100vw - 24px));
+  padding: 14px 16px;
+  border: 3px solid #1f2937;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 5px 5px 0 #d6d3d1;
+  color: #1f2937;
+  text-align: center;
+  animation: wave-stamp 420ms ease-out both;
+}
+
+.loading-fallback strong {
+  font-size: 16px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.loading-fallback span {
+  color: rgba(31, 41, 55, 0.68);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .doodle-callout {
@@ -1146,7 +1185,8 @@ button:disabled {
   .status-chip.is-fever,
   .status-chip.is-shielded,
   .wave-banner,
-  .doodle-callout {
+  .doodle-callout,
+  .loading-fallback {
     animation: none;
   }
 }

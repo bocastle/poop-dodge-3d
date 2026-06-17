@@ -4,6 +4,7 @@ import { playGameSound, primeGameAudio, setGameSoundEnabled } from "../game/audi
 import { useKeyboardControls } from "../game/input/useKeyboardControls";
 import { useTouchControls } from "../game/input/useTouchControls";
 import { GameOverlay } from "../ui/GameOverlay";
+import { LoadingFallback } from "../ui/LoadingFallback";
 import { readHighScore, writeHighScore } from "../game/storage/highScore";
 import { readSoundEnabled, writeSoundEnabled } from "../game/storage/soundPreference";
 import { useMultiplayerRoom } from "../multiplayer/useMultiplayerRoom";
@@ -27,8 +28,9 @@ import {
   survivorListMobileQuery,
 } from "./survivorListViewport";
 
+const gameSceneModulePromise = import("../game/GameScene");
 const GameScene = lazy(() =>
-  import("../game/GameScene").then((module) => ({ default: module.GameScene }))
+  gameSceneModulePromise.then((module) => ({ default: module.GameScene }))
 );
 
 const initialStats: GameStats = {
@@ -89,6 +91,7 @@ export function App() {
   const [runId, setRunId] = useState(0);
   const [stats, setStats] = useState<GameStats>(initialStats);
   const [soundEnabled, setSoundEnabled] = useState(readSoundEnabled);
+  const [gameSceneReady, setGameSceneReady] = useState(false);
   const [survivorListOpen, setSurvivorListOpen] = useState(getInitialSurvivorListOpen);
   const lastStartedRound = useRef<LastStartedMultiplayerRound | null>(null);
   const lastSoundCalloutId = useRef(0);
@@ -108,6 +111,20 @@ export function App() {
     setGameSoundEnabled(soundEnabled);
     writeSoundEnabled(soundEnabled);
   }, [soundEnabled]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void gameSceneModulePromise.then(() => {
+      if (!cancelled) {
+        setGameSceneReady(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -346,21 +363,27 @@ export function App() {
           />
         </Suspense>
       </Canvas>
-      <GameOverlay
-        mode={mode}
-        phase={phase}
-        stats={stats}
-        touchActive={touchControls.active}
-        multiplayer={multiplayer}
-        survivorListCollapsed={!survivorListOpen}
-        soundEnabled={soundEnabled}
-        onToggleSound={toggleSound}
-        onToggleSurvivorList={toggleSurvivorList}
-        onStartSingle={startGame}
-        onSelectMultiplayer={selectMultiplayer}
-        onBackToSingle={backToSingle}
-        onLeaveMultiplayerRoom={leaveMultiplayerRoom}
-      />
+      {!gameSceneReady ? (
+        <div className="scene-loading-layer">
+          <LoadingFallback />
+        </div>
+      ) : (
+        <GameOverlay
+          mode={mode}
+          phase={phase}
+          stats={stats}
+          touchActive={touchControls.active}
+          multiplayer={multiplayer}
+          survivorListCollapsed={!survivorListOpen}
+          soundEnabled={soundEnabled}
+          onToggleSound={toggleSound}
+          onToggleSurvivorList={toggleSurvivorList}
+          onStartSingle={startGame}
+          onSelectMultiplayer={selectMultiplayer}
+          onBackToSingle={backToSingle}
+          onLeaveMultiplayerRoom={leaveMultiplayerRoom}
+        />
+      )}
     </main>
   );
 }

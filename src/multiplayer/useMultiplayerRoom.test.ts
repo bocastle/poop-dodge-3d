@@ -393,4 +393,52 @@ describe("useMultiplayerRoom", () => {
     expect(hook.getCurrent().state.room).toBeNull();
     hook.unmount();
   });
+
+  it("explains that single player works when the multiplayer server is not configured", () => {
+    vi.mocked(getMultiplayerServerUrl).mockReturnValue(undefined);
+    const hook = mountMultiplayerHook();
+
+    act(() => {
+      hook.getCurrent().createRoom();
+    });
+
+    expect(hook.getCurrent().state.error?.message).toBe(
+      "Multiplayer server is not configured. Single player is ready."
+    );
+    hook.unmount();
+  });
+
+  it("explains that single player works when multiplayer connection fails", () => {
+    const { hook, socket } = setupHookWithSocket();
+
+    act(() => {
+      hook.getCurrent().createRoom();
+      socket.trigger("connect_error");
+    });
+
+    expect(hook.getCurrent().state.error?.message).toBe(
+      "Could not reach the multiplayer server. Single player still works."
+    );
+    hook.unmount();
+  });
+
+  it("explains recovery options when an active room connection is lost", () => {
+    const { hook, socket } = setupHookWithSocket();
+    const room = createRoom([
+      createPlayer("socket-local", "Ada"),
+      createPlayer("socket-remote", "Lin"),
+    ]);
+
+    act(() => {
+      hook.getCurrent().connect();
+      socket.trigger("connect");
+      socket.trigger("room:state", room);
+      socket.trigger("disconnect");
+    });
+
+    expect(hook.getCurrent().state.error?.message).toBe(
+      "Connection lost. Start a single run or try multiplayer again."
+    );
+    hook.unmount();
+  });
 });

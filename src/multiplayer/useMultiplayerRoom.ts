@@ -69,17 +69,17 @@ export type UseMultiplayerRoomResult = {
 
 const serverUnavailableError: RoomErrorPayload = {
   code: "server_error",
-  message: "Set VITE_MULTIPLAYER_SERVER_URL to use multiplayer.",
+  message: "Multiplayer server is not configured. Single player is ready.",
 };
 
 const connectionFailedError: RoomErrorPayload = {
   code: "server_error",
-  message: "Unable to connect to the multiplayer server.",
+  message: "Could not reach the multiplayer server. Single player still works.",
 };
 
 const connectionLostError: RoomErrorPayload = {
   code: "server_error",
-  message: "Lost connection to the multiplayer server.",
+  message: "Connection lost. Start a single run or try multiplayer again.",
 };
 
 const roomStatuses = new Set<string>([
