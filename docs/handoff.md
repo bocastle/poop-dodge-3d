@@ -3,12 +3,12 @@
 ## Current State
 
 - Repository: `poop-dodge-3d`
-- Current working branch: `feature/responsive-game-shell`
+- Current working branch: `feature/mobile-camera-framing`
 - Integration branch: `develop`
 - Release branch: `main`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: web MVP is merged to `main` and is now a first web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, Web Open Stability QA pass, Web Open Release Readiness pass, and Mobile Multiplayer Entry Fit pass are included in `main`.
-- Deployment status: frontend is deployed at `https://poop-dodge-3d.vercel.app/`; multiplayer server is deployed at `https://poop-dodge-3d.onrender.com`. The current feature branch is planning a full responsive game shell rework so the canvas, HUD, panels, controls, and survivor list behave as one layout system from `320x568` upward.
+- Project status: web MVP is merged to `main` and is now a first web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, Web Open Stability QA pass, Web Open Release Readiness pass, Mobile Multiplayer Entry Fit pass, and Responsive Game Shell design are included in `main`.
+- Deployment status: frontend is deployed at `https://poop-dodge-3d.vercel.app/`; multiplayer server is deployed at `https://poop-dodge-3d.onrender.com`. The current feature branch fixes mobile portrait camera framing so the player remains visible at the arena edges on phone-sized screens.
 
 ## Product Direction
 
@@ -71,14 +71,12 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Review `docs/superpowers/specs/2026-06-17-responsive-game-shell-design.md`.
-2. Create an implementation plan for the approved responsive game shell rework.
-3. Implement the CSS-first responsive layout system on `feature/responsive-game-shell`.
-4. Verify `320x568`, `360x640`, `375x667`, `390x844`, `667x375`, `768x1024`, and `1280x720` locally.
-5. Merge through `develop` into `main` after verification and explicit user approval.
-6. Let Vercel deploy the updated frontend from `main`, then re-check the public URL.
-7. Run a two-device multiplayer room create/join/start smoke test.
-8. Decide whether the first public opening is `go` or `go with notes`.
+1. Complete verification for `feature/mobile-camera-framing`.
+2. If approved, commit with a Korean commit message and merge through `develop` into `main`.
+3. Let Vercel deploy the updated frontend from `main`, then re-check the public URL on a real phone.
+4. Continue the broader responsive game shell implementation from `docs/superpowers/specs/2026-06-17-responsive-game-shell-design.md`.
+5. Run a two-device multiplayer room create/join/start smoke test.
+6. Decide whether the first public opening is `go` or `go with notes`.
 
 ## Useful Commands
 
@@ -104,6 +102,7 @@ npm run server:start
 ## Notes
 
 - The Responsive Game Shell design is documented at `docs/superpowers/specs/2026-06-17-responsive-game-shell-design.md`. It should replace one-off small-screen layout patches with shared responsive CSS variables and viewport acceptance checks.
+- The Mobile Camera Framing fix adds `src/game/camera.ts` and `src/game/camera.test.ts`. It scales the camera distance only when the canvas aspect ratio is narrower than `0.78`, keeping the player visible at arena edges on portrait phones while preserving desktop and landscape framing.
 - The Mobile Multiplayer Entry Fit pass compresses only `.multiplayer-panel[data-panel="multiplayer-entry"]` on narrow or short mobile viewports. It keeps the footer controls visible and leaves lobby/playing layouts unchanged.
 - The Web Open Release Readiness pass is documentation-first: it updates release state, records QA evidence, and prepares deployment criteria. It does not deploy the app unless the user separately approves deployment.
 - The Web Open Release Readiness pass adds `docs/deployment-readiness.md` and `docs/web-open-qa-results.md`. Use those documents before approving staging or production deployment.
