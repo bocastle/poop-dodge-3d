@@ -1113,6 +1113,10 @@ button:disabled {
     display: none;
   }
 
+  .panel[data-panel="game-over"] .run-highlight {
+    display: none;
+  }
+
   .summary {
     margin: 8px 0 10px;
     font-size: 13px;
