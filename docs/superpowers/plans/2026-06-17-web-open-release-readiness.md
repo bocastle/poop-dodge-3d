@@ -270,7 +270,7 @@ Expected: commit succeeds.
 - Create: `docs/web-open-qa-results.md`
 - Modify: `docs/superpowers/plans/2026-06-17-web-open-release-readiness.md`
 
-- [ ] **Step 1: Capture release metadata**
+- [x] **Step 1: Capture release metadata**
 
 Run:
 
@@ -281,7 +281,7 @@ date +%F
 
 Expected: first command prints the current short commit hash; second command prints the current date.
 
-- [ ] **Step 2: Run automated verification**
+- [x] **Step 2: Run automated verification**
 
 Run:
 
@@ -299,7 +299,7 @@ Expected:
 - `npm run build`: exit code `0` and a Vite production build summary
 - `npm run server:check`: exit code `0`
 
-- [ ] **Step 3: Create `docs/web-open-qa-results.md`**
+- [x] **Step 3: Create `docs/web-open-qa-results.md`**
 
 Create the file with this content. Set the `Date` value to the date printed in Step 1. Set the `Verification commit` value to the short commit hash printed in Step 1.
 
@@ -365,11 +365,11 @@ Create the file with this content. Set the `Date` value to the date printed in S
 The automated checks pass. Browser and multiplayer QA rows must be updated before a public URL is shared beyond staging.
 ```
 
-- [ ] **Step 4: Replace the commit value**
+- [x] **Step 4: Replace the commit value**
 
 Replace `<use the short commit hash printed in Step 1>` with the short commit hash from Step 1. Keep the date as `2026-06-17` unless Step 1 printed a different date.
 
-- [ ] **Step 5: Verify no dynamic marker remains**
+- [x] **Step 5: Verify no dynamic marker remains**
 
 Run:
 
@@ -379,7 +379,7 @@ rg -n "<use the short commit hash printed in Step 1>" docs/web-open-qa-results.m
 
 Expected: no output and exit code `1`.
 
-- [ ] **Step 6: Commit automated QA results**
+- [x] **Step 6: Commit automated QA results**
 
 Run:
 
