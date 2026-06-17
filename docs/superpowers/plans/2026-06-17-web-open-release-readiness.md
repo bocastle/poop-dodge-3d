@@ -126,7 +126,7 @@ Expected: commit succeeds.
 - Create: `docs/deployment-readiness.md`
 - Modify: `docs/superpowers/plans/2026-06-17-web-open-release-readiness.md`
 
-- [ ] **Step 1: Confirm the document does not exist yet**
+- [x] **Step 1: Confirm the document does not exist yet**
 
 Run:
 
@@ -136,7 +136,7 @@ test ! -f docs/deployment-readiness.md
 
 Expected: exit code `0`.
 
-- [ ] **Step 2: Create `docs/deployment-readiness.md`**
+- [x] **Step 2: Create `docs/deployment-readiness.md`**
 
 Create the file with this content:
 
@@ -243,7 +243,7 @@ Use separate values for local, staging, and production.
 - Real-device mobile QA is still required before broader promotion.
 ```
 
-- [ ] **Step 3: Verify key deployment sections exist**
+- [x] **Step 3: Verify key deployment sections exist**
 
 Run:
 
@@ -253,7 +253,7 @@ rg -n "Frontend Hosting Candidates|Multiplayer Server Hosting Candidates|Require
 
 Expected: six matching lines.
 
-- [ ] **Step 4: Commit deployment readiness docs**
+- [x] **Step 4: Commit deployment readiness docs**
 
 Run:
 
