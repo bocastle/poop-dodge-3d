@@ -395,8 +395,9 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `docs/web-open-qa-results.md`
 - Modify: `docs/superpowers/plans/2026-06-17-web-open-release-readiness.md`
+- Modify if QA finds a release blocker: `src/styles.css`
 
-- [ ] **Step 1: Start the multiplayer server**
+- [x] **Step 1: Start the multiplayer server**
 
 Run:
 
@@ -406,7 +407,7 @@ PORT=5174 CLIENT_ORIGIN=http://127.0.0.1:5173 npm run server:start
 
 Expected: server logs `multiplayer server listening on 5174`.
 
-- [ ] **Step 2: Start the web app**
+- [x] **Step 2: Start the web app**
 
 Run in a separate terminal:
 
@@ -416,7 +417,7 @@ VITE_MULTIPLAYER_SERVER_URL=http://127.0.0.1:5174 npm run dev -- --host 127.0.0.
 
 Expected: Vite prints `Local:   http://127.0.0.1:5173/`.
 
-- [ ] **Step 3: Verify Chrome desktop**
+- [x] **Step 3: Verify Chrome desktop**
 
 Open `http://127.0.0.1:5173/` in Chrome or the in-app browser.
 
@@ -436,7 +437,7 @@ Update the Chrome row in `docs/web-open-qa-results.md` to:
 | Chrome desktop | Pass | Ready screen, single-player start, retry path, sound toggle, and console check passed. |
 ```
 
-- [ ] **Step 4: Verify mobile portrait**
+- [x] **Step 4: Verify mobile portrait**
 
 Set viewport to `390x844`.
 
@@ -453,7 +454,7 @@ Update the mobile portrait row:
 | Mobile portrait `390x844` | Pass | Ready/game-over layouts fit and controls remain visible. |
 ```
 
-- [ ] **Step 5: Verify mobile landscape**
+- [x] **Step 5: Verify mobile landscape**
 
 Set viewport to `667x375`.
 
@@ -469,7 +470,9 @@ Update the mobile landscape row:
 | Mobile landscape `667x375` | Pass | Ready and game-over controls remain visible in short landscape viewport. |
 ```
 
-- [ ] **Step 6: Verify multiplayer create/join/countdown**
+Execution note: QA found the game-over `Retry` button was clipped in `667x375`. The release-blocking fix hides `.run-highlight` inside game-over panels under the existing short-height media query. Re-verification passed with `Retry` fully inside the viewport.
+
+- [x] **Step 6: Verify multiplayer create/join/countdown**
 
 Use one browser client as host and a second client or Socket.IO test client as guest.
 
@@ -490,7 +493,7 @@ Update rows:
 | Leave room | Pass | Leaving returned to the single/multiplayer choice screen. |
 ```
 
-- [ ] **Step 7: Verify max room size**
+- [x] **Step 7: Verify max room size**
 
 Use server-side test clients or existing automated test evidence.
 
@@ -508,7 +511,7 @@ Update the row:
 | Max room size | Pass | `npm run test -- server/rooms.test.ts` passed with room capacity coverage. |
 ```
 
-- [ ] **Step 8: Verify server unavailable paths**
+- [x] **Step 8: Verify server unavailable paths**
 
 Stop the multiplayer server and reload the web app with `VITE_MULTIPLAYER_SERVER_URL` still pointing to `http://127.0.0.1:5174`.
 
@@ -524,7 +527,7 @@ Update rows:
 | Server stopped | Pass | Browser showed multiplayer connection failure while single-player still started. |
 ```
 
-- [ ] **Step 9: Update console section**
+- [x] **Step 9: Update console section**
 
 If no fresh browser errors are found, replace the console section with:
 
@@ -544,7 +547,7 @@ If only Three's `Clock` deprecation warning appears, record it under notes rathe
 - Non-blocking warning observed: Three's `Clock` deprecation warning.
 ```
 
-- [ ] **Step 10: Update public opening decision**
+- [x] **Step 10: Update public opening decision**
 
 If all automated checks and browser checks pass, keep:
 
