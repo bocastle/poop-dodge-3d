@@ -10,5 +10,11 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["vite.config.ts", "eslint.config.js"]
+  "include": [
+    "vite.config.ts",
+    "eslint.config.js",
+    "server/**/*.ts",
+    "src/multiplayer/**/*.ts",
+    "src/game/types.ts"
+  ]
 }

@@ -27,5 +27,12 @@ export default tseslint.config(
       "react-hooks/immutability": "off",
       "react-hooks/set-state-in-effect": "off",
     },
+  },
+  {
+    files: ["server/**/*.ts"],
+    languageOptions: {
+      ecmaVersion: 2023,
+      globals: globals.node,
+    },
   }
 );
