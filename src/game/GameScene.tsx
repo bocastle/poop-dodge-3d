@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type { Group } from "three";
+import { CAMERA_TARGET, getResponsiveCameraPosition } from "./camera";
 import { getCameraShake } from "./feedback";
 import {
   getCalloutTone,
@@ -58,7 +59,6 @@ import { getDoodlePlayerMood, type DoodlePlayerMood } from "./visuals/doodleStyl
 
 const startPosition: Position = { x: 0, y: GAME_TUNING.player.startY, z: 0 };
 const maxRenderedObstacles = GAME_TUNING.visuals.maxRenderedObstacles;
-const cameraBasePosition = { x: 0, y: 8.5, z: 9 };
 
 type GameSceneProps = {
   input: InputVector;
@@ -185,7 +185,8 @@ export function GameScene({
       dramaTimer.current = Math.max(0, dramaTimer.current - realDt);
     }
 
-    state.camera.position.set(cameraBasePosition.x, cameraBasePosition.y, cameraBasePosition.z);
+    const cameraPosition = getResponsiveCameraPosition(state.size.width / state.size.height);
+    state.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     if (impactTimer.current > 0) {
       const secondsSinceImpact =
         GAME_TUNING.visuals.cameraShakeSeconds - impactTimer.current;
@@ -194,12 +195,12 @@ export function GameScene({
       state.camera.position.y += Math.cos(state.clock.elapsedTime * 71) * shake;
       impactTimer.current = Math.max(0, impactTimer.current - realDt);
     }
-    state.camera.lookAt(0, 0, 0);
+    state.camera.lookAt(CAMERA_TARGET.x, CAMERA_TARGET.y, CAMERA_TARGET.z);
 
     if (freezeTimer.current > 0) {
       updatePlayerMood("shield");
       freezeTimer.current = Math.max(0, freezeTimer.current - realDt);
-      state.camera.lookAt(0, 0, 0);
+      state.camera.lookAt(CAMERA_TARGET.x, CAMERA_TARGET.y, CAMERA_TARGET.z);
       return;
     }
 
