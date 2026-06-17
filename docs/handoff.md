@@ -71,12 +71,12 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Complete the Web Open Release Readiness pass on `feature/web-open-release-readiness`.
-2. Record automated and browser QA results in `docs/web-open-qa-results.md`.
-3. Document deployment options and environment requirements in `docs/deployment-readiness.md`.
-4. Fix only release-blocking issues discovered during QA; defer feature requests to later specs.
-5. After user approval, merge through `develop` into `main`.
-6. After a separate deployment approval, create a staging deployment and verify the public URL path.
+1. Review the Web Open Release Readiness pass on `feature/web-open-release-readiness`.
+2. Choose the integration path: keep local for review, push the feature branch, or merge through `develop` into `main`.
+3. After user approval, merge through `develop` into `main`.
+4. After separate deployment approval, create a staging deployment and verify the public URL path.
+5. Run staging Socket.IO QA against the deployed frontend and multiplayer server URLs.
+6. Decide whether the first public opening is `go` or `go with notes`.
 
 ## Useful Commands
 
