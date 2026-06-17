@@ -1004,6 +1004,46 @@ button:disabled {
   }
 }
 
+@media (max-width: 380px), (max-height: 680px) {
+  .multiplayer-panel[data-panel="multiplayer-entry"] {
+    gap: 5px;
+    padding: 10px 14px;
+  }
+
+  .multiplayer-panel[data-panel="multiplayer-entry"] .panel-status {
+    display: grid;
+    gap: 3px;
+  }
+
+  .multiplayer-panel[data-panel="multiplayer-entry"] .summary {
+    margin: 2px 0 4px;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .multiplayer-panel[data-panel="multiplayer-entry"] .field-label {
+    margin: 0 0 -3px;
+    font-size: 10px;
+  }
+
+  .multiplayer-panel[data-panel="multiplayer-entry"] .mode-actions {
+    gap: 5px;
+    margin-top: 4px;
+  }
+
+  .multiplayer-panel[data-panel="multiplayer-entry"] .paper-input {
+    min-height: 32px;
+    padding: 5px 8px;
+  }
+
+  .multiplayer-panel[data-panel="multiplayer-entry"] .primary-action,
+  .multiplayer-panel[data-panel="multiplayer-entry"] .paper-action {
+    min-width: 128px;
+    min-height: 32px;
+    padding: 5px 10px;
+  }
+}
+
 @media (max-width: 700px) {
   .survivor-list {
     top: 108px;

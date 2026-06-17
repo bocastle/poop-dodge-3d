@@ -3,12 +3,12 @@
 ## Current State
 
 - Repository: `poop-dodge-3d`
-- Current working branch: `feature/web-open-release-readiness`
+- Current working branch: `feature/mobile-multiplayer-entry-fit`
 - Integration branch: `develop`
 - Release branch: `main`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: web MVP is merged to `main` and is now a first web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, and Web Open Stability QA pass are included in `main`.
-- Deployment status: not deployed. The current goal is release-readiness documentation, QA evidence, and staging deployment preparation before any public URL is opened.
+- Project status: web MVP is merged to `main` and is now a first web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, Web Open Stability QA pass, and Web Open Release Readiness pass are included in `main`.
+- Deployment status: frontend is deployed at `https://poop-dodge-3d.vercel.app/`; multiplayer server is deployed at `https://poop-dodge-3d.onrender.com`. The current feature branch fixes the small-mobile multiplayer entry layout before merging back through `develop` and `main`.
 
 ## Product Direction
 
@@ -71,11 +71,11 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Review the Web Open Release Readiness pass on `feature/web-open-release-readiness`.
-2. Choose the integration path: keep local for review, push the feature branch, or merge through `develop` into `main`.
-3. After user approval, merge through `develop` into `main`.
-4. After separate deployment approval, create a staging deployment and verify the public URL path.
-5. Run staging Socket.IO QA against the deployed frontend and multiplayer server URLs.
+1. Complete and review the small-mobile multiplayer entry layout fix on `feature/mobile-multiplayer-entry-fit`.
+2. Merge the fix through `develop` into `main` after verification.
+3. Let Vercel deploy the updated frontend from `main`.
+4. Re-check `320x568`, `360x640`, `375x667`, `390x664`, and `390x844` against the public Vercel URL.
+5. Run a two-device multiplayer room create/join/start smoke test.
 6. Decide whether the first public opening is `go` or `go with notes`.
 
 ## Useful Commands
@@ -101,6 +101,7 @@ npm run server:start
 
 ## Notes
 
+- The Mobile Multiplayer Entry Fit pass compresses only `.multiplayer-panel[data-panel="multiplayer-entry"]` on narrow or short mobile viewports. It keeps the footer controls visible and leaves lobby/playing layouts unchanged.
 - The Web Open Release Readiness pass is documentation-first: it updates release state, records QA evidence, and prepares deployment criteria. It does not deploy the app unless the user separately approves deployment.
 - The Web Open Release Readiness pass adds `docs/deployment-readiness.md` and `docs/web-open-qa-results.md`. Use those documents before approving staging or production deployment.
 - Do not deploy until the user explicitly approves deployment.
