@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { playGameSound, primeGameAudio, setGameSoundEnabled } from "../game/audio";
+import { CAMERA_BASE_POSITION, CAMERA_FOV } from "../game/camera";
 import { useKeyboardControls } from "../game/input/useKeyboardControls";
 import { useTouchControls } from "../game/input/useTouchControls";
 import { GameOverlay } from "../ui/GameOverlay";
@@ -341,7 +342,14 @@ export function App() {
   return (
     <main className="game-shell" data-phase={phase} {...touchControls.handlers}>
       <Canvas
-        camera={{ position: [0, 8.5, 9], fov: 48 }}
+        camera={{
+          position: [
+            CAMERA_BASE_POSITION.x,
+            CAMERA_BASE_POSITION.y,
+            CAMERA_BASE_POSITION.z,
+          ],
+          fov: CAMERA_FOV,
+        }}
         dpr={[1, 1.5]}
         gl={{
           antialias: true,
