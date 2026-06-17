@@ -3,12 +3,12 @@
 ## Current State
 
 - Repository: `poop-dodge-3d`
-- Current branch: `feature/pure-doodle-redesign`
+- Current working branch: `feature/web-open-release-readiness`
 - Integration branch: `develop`
+- Release branch: `main`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: local web MVP implemented. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, and Web Open Stability QA pass are implemented locally on `feature/pure-doodle-redesign` and are pending final user review, commit, push, and integration.
-- Stacked-work note: multiplayer work is currently stacked on top of the existing Pure Doodle/game-feel branch rather than isolated in a separate feature branch.
-- Deployment status: no deployment. The current goal is web optimization before public release.
+- Project status: web MVP is merged to `main` and is now a first web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, and Web Open Stability QA pass are included in `main`.
+- Deployment status: not deployed. The current goal is release-readiness documentation, QA evidence, and staging deployment preparation before any public URL is opened.
 
 ## Product Direction
 
@@ -71,11 +71,12 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Have the user review the latest C1 Pure Doodle, Game Feel Shield Impact, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, and Web Open Readiness pass build locally.
-2. If approved, commit with a Korean commit message, push `feature/pure-doodle-redesign`, then merge through `develop` according to the branch workflow.
-3. For stronger mobile confidence, test touch controls on a real iOS Safari or Android Chrome device.
-4. Decide whether the next feature should focus on multiplayer UX polish, authored assets, model replacement, real-device mobile tuning, result/restart polish, or deeper renderer performance work.
-5. Decide later whether `main` should receive the MVP after user review.
+1. Complete the Web Open Release Readiness pass on `feature/web-open-release-readiness`.
+2. Record automated and browser QA results in `docs/web-open-qa-results.md`.
+3. Document deployment options and environment requirements in `docs/deployment-readiness.md`.
+4. Fix only release-blocking issues discovered during QA; defer feature requests to later specs.
+5. After user approval, merge through `develop` into `main`.
+6. After a separate deployment approval, create a staging deployment and verify the public URL path.
 
 ## Useful Commands
 
@@ -100,6 +101,7 @@ npm run server:start
 
 ## Notes
 
+- The Web Open Release Readiness pass is documentation-first: it updates release state, records QA evidence, and prepares deployment criteria. It does not deploy the app unless the user separately approves deployment.
 - Do not deploy until the user explicitly approves deployment.
 - Do not start implementation work before the current feature design is approved.
 - The Web Open Readiness pass added `GameScene` lazy loading, explicit vendor chunking, and a 3D-vendor-aware chunk warning limit. The latest verified build has no Vite chunk warning.

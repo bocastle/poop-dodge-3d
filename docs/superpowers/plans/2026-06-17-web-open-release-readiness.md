@@ -33,7 +33,7 @@
 - Modify: `docs/handoff.md`
 - Modify: `docs/superpowers/plans/2026-06-17-web-open-release-readiness.md`
 
-- [ ] **Step 1: Confirm branch and stale handoff text**
+- [x] **Step 1: Confirm branch and stale handoff text**
 
 Run:
 
@@ -50,7 +50,7 @@ Expected:
 
 Expected `rg`: at least one stale line is found before editing.
 
-- [ ] **Step 2: Update the Current State section**
+- [x] **Step 2: Update the Current State section**
 
 In `docs/handoff.md`, replace the whole `## Current State` bullet block with this content:
 
@@ -66,7 +66,7 @@ In `docs/handoff.md`, replace the whole `## Current State` bullet block with thi
 - Deployment status: not deployed. The current goal is release-readiness documentation, QA evidence, and staging deployment preparation before any public URL is opened.
 ```
 
-- [ ] **Step 3: Update Next Steps**
+- [x] **Step 3: Update Next Steps**
 
 Replace the whole `## Next Steps` numbered list with:
 
@@ -81,7 +81,7 @@ Replace the whole `## Next Steps` numbered list with:
 6. After a separate deployment approval, create a staging deployment and verify the public URL path.
 ```
 
-- [ ] **Step 4: Add a release-readiness note**
+- [x] **Step 4: Add a release-readiness note**
 
 In the `## Notes` section, add this bullet near the top:
 
@@ -89,7 +89,7 @@ In the `## Notes` section, add this bullet near the top:
 - The Web Open Release Readiness pass is documentation-first: it updates release state, records QA evidence, and prepares deployment criteria. It does not deploy the app unless the user separately approves deployment.
 ```
 
-- [ ] **Step 5: Verify stale text is removed**
+- [x] **Step 5: Verify stale text is removed**
 
 Run:
 
@@ -99,7 +99,7 @@ rg -n "feature/pure-doodle-redesign|pending final user review|pending final user
 
 Expected: no output and exit code `1`.
 
-- [ ] **Step 6: Review the handoff diff**
+- [x] **Step 6: Review the handoff diff**
 
 Run:
 
@@ -109,7 +109,7 @@ git diff -- docs/handoff.md
 
 Expected: only release-state, next-step, and release-readiness note changes appear.
 
-- [ ] **Step 7: Commit the handoff cleanup**
+- [x] **Step 7: Commit the handoff cleanup**
 
 Run:
 
