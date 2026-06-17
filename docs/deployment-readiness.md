@@ -7,7 +7,7 @@ This document prepares the first web opening for `poop-dodge-3d`. It does not ap
 ## Current Release Candidate
 
 - Release branch: `main`
-- Working release-readiness branch: `feature/web-open-release-readiness`
+- Readiness pass: 2026-06-17 Web Open Release Readiness
 - App type: browser-first Vite/React/React Three Fiber game
 - Multiplayer type: Socket.IO server with in-memory rooms
 - Public opening target: web first
@@ -48,13 +48,15 @@ Use separate values for local, staging, and production.
 
 | Environment | Frontend Origin | Server Origin | Notes |
 | --- | --- | --- | --- |
-| Local | `http://127.0.0.1:5173` | `http://127.0.0.1:5174` | Used for local dev and QA. |
+| Local | `http://localhost:5173` | `http://localhost:5174` | Matches `.env.example`; used for local dev and QA. |
 | Staging | provider preview URL | staging server URL | Used before public opening. |
 | Production | final public URL | production server URL | Used only after user approval. |
 
 ## CORS Rules
 
 - `CLIENT_ORIGIN` must match the exact frontend origin.
+- `localhost` and `127.0.0.1` are different origins. Use the same host form in `CLIENT_ORIGIN` as the frontend URL being tested.
+- If testing the frontend at `http://127.0.0.1:5173`, set `CLIENT_ORIGIN=http://127.0.0.1:5173` for that server run.
 - Staging and production must not share the same server environment unless that is explicitly approved.
 - If the frontend origin changes, update `CLIENT_ORIGIN` before testing multiplayer.
 - Single-player must remain playable when the multiplayer server is unavailable.
@@ -65,6 +67,10 @@ Use separate values for local, staging, and production.
 - Join room accepts a valid 4-digit room code.
 - The host can start a synchronized `3 -> 2 -> 1 -> START` countdown.
 - Late joiners during an active round wait for the next round.
+- Disconnecting an alive player during an active round marks that player eliminated and emits the updated room or results state.
+- If the host leaves or disconnects while other players remain, host status transfers to the earliest remaining connected player.
+- After host transfer, the remaining host can start the next synchronized countdown.
+- If only one active player remains after disconnects, the round settles into results with the remaining player as winner.
 - Leaving a room returns to the single/multiplayer choice screen.
 - Stopping the server produces a clear multiplayer error while preserving single-player.
 - The 11th player is rejected because rooms are capped at 10 players.
@@ -94,6 +100,7 @@ Use separate values for local, staging, and production.
 ## Deferred Production Risks
 
 - Rooms are in memory and disappear on server restart.
+- Idle-room cleanup is implemented in `cleanupIdleRooms` in `server/rooms.ts`, but the running server in `server/index.ts` does not wire a scheduler for it yet.
 - There is no login or durable identity.
 - There is no reconnect grace.
 - There is no anti-cheat or inbound position rate limiting.
