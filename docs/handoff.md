@@ -102,6 +102,7 @@ npm run server:start
 ## Notes
 
 - The Web Open Release Readiness pass is documentation-first: it updates release state, records QA evidence, and prepares deployment criteria. It does not deploy the app unless the user separately approves deployment.
+- The Web Open Release Readiness pass adds `docs/deployment-readiness.md` and `docs/web-open-qa-results.md`. Use those documents before approving staging or production deployment.
 - Do not deploy until the user explicitly approves deployment.
 - Do not start implementation work before the current feature design is approved.
 - The Web Open Readiness pass added `GameScene` lazy loading, explicit vendor chunking, and a 3D-vendor-aware chunk warning limit. The latest verified build has no Vite chunk warning.

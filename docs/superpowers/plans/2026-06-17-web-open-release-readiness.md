@@ -557,7 +557,7 @@ If all automated checks and browser checks pass, keep:
 
 Use `go with notes` because Safari desktop and real-device mobile can still remain manual/deferred checks. Use `no-go` if any release blocker appears.
 
-- [ ] **Step 11: Commit browser QA evidence**
+- [x] **Step 11: Commit browser QA evidence**
 
 Run:
 
@@ -575,7 +575,7 @@ Expected: commit succeeds.
 - Modify: `docs/handoff.md`
 - Modify: `docs/superpowers/plans/2026-06-17-web-open-release-readiness.md`
 
-- [ ] **Step 1: Create the retrospective**
+- [x] **Step 1: Create the retrospective**
 
 Create `docs/retrospectives/2026-06-17-web-open-release-readiness.md` with:
 
@@ -616,7 +616,7 @@ Create `docs/retrospectives/2026-06-17-web-open-release-readiness.md` with:
 - Decide whether first public opening is `go` or `go with notes`.
 ```
 
-- [ ] **Step 2: Add final handoff note**
+- [x] **Step 2: Add final handoff note**
 
 In `docs/handoff.md`, add this note near the top of `## Notes`:
 
@@ -624,7 +624,7 @@ In `docs/handoff.md`, add this note near the top of `## Notes`:
 - The Web Open Release Readiness pass adds `docs/deployment-readiness.md` and `docs/web-open-qa-results.md`. Use those documents before approving staging or production deployment.
 ```
 
-- [ ] **Step 3: Run final verification**
+- [x] **Step 3: Run final verification**
 
 Run:
 
@@ -642,7 +642,7 @@ Expected:
 - `npm run build`: exit code `0`
 - `npm run server:check`: exit code `0`
 
-- [ ] **Step 4: Verify docs exist**
+- [x] **Step 4: Verify docs exist**
 
 Run:
 
@@ -654,7 +654,7 @@ test -f docs/retrospectives/2026-06-17-web-open-release-readiness.md
 
 Expected: each command exits `0`.
 
-- [ ] **Step 5: Verify no stale release-state text remains**
+- [x] **Step 5: Verify no stale release-state text remains**
 
 Run:
 
@@ -664,7 +664,7 @@ rg -n "pending final user review|Decide later whether `main` should receive|feat
 
 Expected: no output and exit code `1`.
 
-- [ ] **Step 6: Commit final readiness docs**
+- [x] **Step 6: Commit final readiness docs**
 
 Run:
 
@@ -675,7 +675,7 @@ git commit -m "웹 오픈 릴리즈 준비 회고 추가"
 
 Expected: commit succeeds.
 
-- [ ] **Step 7: Final status check**
+- [x] **Step 7: Final status check**
 
 Run:
 
