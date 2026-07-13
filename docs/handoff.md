@@ -3,16 +3,20 @@
 ## Current State
 
 - Repository: `poop-dodge-3d`
-- Current working branch: `feature/mobile-camera-framing`
+- Current working branch: `main`
 - Integration branch: `develop`
 - Release branch: `main`
 - Remote: `https://github.com/bocastle/poop-dodge-3d.git`
-- Project status: web MVP is merged to `main` and is now a first web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, Web Open Stability QA pass, Web Open Release Readiness pass, Mobile Multiplayer Entry Fit pass, and Responsive Game Shell design are included in `main`.
-- Deployment status: frontend is deployed at `https://poop-dodge-3d.vercel.app/`; multiplayer server is deployed at `https://poop-dodge-3d.onrender.com`. The current feature branch fixes mobile portrait camera framing so the player remains visible at the arena edges on phone-sized screens.
+- Latest release commit on `main`: `b480c72` (`모바일 카메라 프레이밍 메인 병합`)
+- Repository visibility: public on GitHub.
+- Branch status: `main` is synced with `origin/main`; `develop` is synced with `origin/develop` and is already included in `main`. There are no known unmerged or unpushed feature changes.
+- Project status: web MVP is merged to `main` and is the current web-open candidate. The C1 Pure Doodle redesign, Close Call Combo/Shield pass, Game Feel Shield Impact pass, Multiplayer Room MVP, Fun Feedback pass, One More Run Loop pass, Web Open Readiness pass, Web Open Stability QA pass, Web Open Release Readiness pass, Mobile Multiplayer Entry Fit pass, Responsive Game Shell design, and Mobile Camera Framing fix are included in `main`.
+- Deployment status: frontend is deployed at `https://poop-dodge-3d.vercel.app/`; multiplayer server is deployed at `https://poop-dodge-3d.onrender.com`. The latest merged camera fix still needs a real-phone check against the deployed frontend.
+- Last handoff cleanup: 2026-07-13.
 
 ## Product Direction
 
-Build a browser-first Three.js dodge game. The player avoids falling objects in a 3D scene. The first delivery target is a local web build that works well on desktop and mobile browsers.
+Build a browser-first Three.js dodge game. The player avoids falling objects in a 3D scene. The local web MVP has been completed and deployed; the current goal is to validate the web-open candidate on real devices before broader sharing.
 
 The MVP now includes:
 
@@ -71,12 +75,11 @@ The MVP now includes:
 
 ## Next Steps
 
-1. Complete verification for `feature/mobile-camera-framing`.
-2. If approved, commit with a Korean commit message and merge through `develop` into `main`.
-3. Let Vercel deploy the updated frontend from `main`, then re-check the public URL on a real phone.
-4. Continue the broader responsive game shell implementation from `docs/superpowers/specs/2026-06-17-responsive-game-shell-design.md`.
-5. Run a two-device multiplayer room create/join/start smoke test.
-6. Decide whether the first public opening is `go` or `go with notes`.
+1. Re-check the deployed frontend on a real phone, especially mobile portrait player visibility at arena edges after the Mobile Camera Framing fix.
+2. Run a two-device multiplayer smoke test against the deployed frontend and Render server: create room, join room, host start, countdown sync, active round, results, leave room.
+3. Decide whether the first public opening is `go` or `go with notes`.
+4. Continue the broader responsive game shell implementation from `docs/superpowers/specs/2026-06-17-responsive-game-shell-design.md` if additional mobile layout issues appear.
+5. For the next feature, start from `develop` on a new `feature/<feature-name>` branch and update this handoff again before merging.
 
 ## Useful Commands
 
@@ -102,14 +105,14 @@ npm run server:start
 ## Notes
 
 - The Responsive Game Shell design is documented at `docs/superpowers/specs/2026-06-17-responsive-game-shell-design.md`. It should replace one-off small-screen layout patches with shared responsive CSS variables and viewport acceptance checks.
-- The Mobile Camera Framing fix adds `src/game/camera.ts` and `src/game/camera.test.ts`. It scales the camera distance only when the canvas aspect ratio is narrower than `0.78`, keeping the player visible at arena edges on portrait phones while preserving desktop and landscape framing.
+- The Mobile Camera Framing fix is already merged through `develop` into `main`. It adds `src/game/camera.ts` and `src/game/camera.test.ts`. It scales the camera distance only when the canvas aspect ratio is narrower than `0.78`, keeping the player visible at arena edges on portrait phones while preserving desktop and landscape framing.
 - The Mobile Multiplayer Entry Fit pass compresses only `.multiplayer-panel[data-panel="multiplayer-entry"]` on narrow or short mobile viewports. It keeps the footer controls visible and leaves lobby/playing layouts unchanged.
 - The Web Open Release Readiness pass is documentation-first: it updates release state, records QA evidence, and prepares deployment criteria. It does not deploy the app unless the user separately approves deployment.
 - The Web Open Release Readiness pass adds `docs/deployment-readiness.md` and `docs/web-open-qa-results.md`. Use those documents before approving staging or production deployment.
-- Do not deploy until the user explicitly approves deployment.
+- The initial Vercel and Render deployments were explicitly approved. Future deployment target changes, app-store packaging, or new public deployment work still require explicit user approval.
 - Do not start implementation work before the current feature design is approved.
 - The Web Open Readiness pass added `GameScene` lazy loading, explicit vendor chunking, and a 3D-vendor-aware chunk warning limit. The latest verified build has no Vite chunk warning.
-- Latest verified production build sizes: app entry `36.20 kB` / gzip `10.70 kB`, `GameScene` `23.97 kB` / gzip `6.24 kB`, `vendor-react` `178.29 kB` / gzip `55.96 kB`, `vendor-r3f` `875.59 kB` / gzip `233.01 kB`.
+- Latest verified production build sizes: app entry `36.81 kB` / gzip `10.90 kB`, `GameScene` `24.02 kB` / gzip `6.26 kB`, `vendor-react` `178.29 kB` / gzip `55.96 kB`, `vendor-r3f` `875.59 kB` / gzip `233.01 kB`.
 - `vendor-r3f` remains the dominant payload because the app is a Three/R3F game. It is now isolated as a cacheable vendor chunk rather than mixed into the app entry.
 - The Web Open Readiness pass added a persisted sound toggle in the footer. It stores `poop-dodge-3d:sound-enabled` in `localStorage`, defaults to enabled, and prevents Web Audio context creation while disabled.
 - The Web Open Readiness pass also tightened reduced-motion CSS so chip, wave, and callout animations are disabled under `prefers-reduced-motion: reduce`.
